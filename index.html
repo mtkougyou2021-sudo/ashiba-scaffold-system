@@ -323,7 +323,7 @@
   }
   .status-bar .ok { color: var(--success); }
 
-  /* ===== ハンバーガーメニュー ===== */
+  /* ===== ハンバーガーメニュー（iPad縦向き用） ===== */
   .menu-toggle {
     display: none;
     background: none;
@@ -345,16 +345,77 @@
     z-index: 99;
   }
 
-  /* ===== モバイル対応 ===== */
-  @media (max-width: 900px) {
+  /* モバイルプレビュー用ヘッダー情報 */
+  .mobile-info {
+    display: none;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 12px;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    text-align: center;
+  }
+  .mobile-info span { color: var(--accent); font-weight: 700; }
+
+  /* ===== iPhone プレビュー専用（幅600px以下） ===== */
+  @media (max-width: 600px) {
+    .sidebar { display: none !important; }
+    .sidebar-overlay { display: none !important; }
+    .menu-toggle { display: none !important; }
+    .mobile-info { display: block; }
+
+    header {
+      padding: 8px 12px;
+      gap: 8px;
+    }
+    header h1 { font-size: 12px; }
+    header .logo { font-size: 9px; letter-spacing: 2px; }
+    header .badge { font-size: 8px; padding: 2px 6px; }
+
+    .app {
+      height: calc(100vh - 38px);
+    }
+
+    .canvas-area { width: 100%; }
+
+    .drawing-wrap {
+      padding: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #drawingCanvas {
+      max-width: none;
+    }
+
+    .tab-bar {
+      padding: 0 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab {
+      padding: 7px 10px;
+      font-size: 10px;
+    }
+
+    .status-bar {
+      padding: 4px 8px;
+      font-size: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+
+  /* ===== iPad縦向き・タブレット（601px〜900px） ===== */
+  @media (min-width: 601px) and (max-width: 900px) {
     .menu-toggle { display: block; }
+    .mobile-info { display: none; }
 
     header {
       padding: 10px 14px;
       gap: 10px;
     }
     header h1 { font-size: 13px; }
-    header .logo { font-size: 9px; letter-spacing: 2px; }
 
     .app {
       height: calc(100vh - 46px);
@@ -363,8 +424,7 @@
     .sidebar {
       position: fixed;
       top: 0; left: 0;
-      width: 85vw;
-      max-width: 340px;
+      width: 340px;
       height: 100vh;
       z-index: 100;
       transform: translateX(-100%);
@@ -383,21 +443,18 @@
     .canvas-area { width: 100%; }
 
     .drawing-wrap {
-      padding: 8px;
+      padding: 10px;
       -webkit-overflow-scrolling: touch;
     }
 
-    #drawingCanvas {
-      max-width: none;
-    }
+    #drawingCanvas { max-width: none; }
 
     .tab-bar {
       padding: 0 8px;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
     }
     .tab {
-      padding: 8px 12px;
+      padding: 8px 14px;
       font-size: 11px;
     }
 
@@ -417,26 +474,6 @@
       padding: 14px;
       font-size: 15px;
     }
-
-    .drop-zone {
-      min-height: 60px;
-      padding: 14px 10px;
-    }
-
-    .info-box {
-      font-size: 10px;
-    }
-  }
-
-  /* iPhone SE等の小画面 */
-  @media (max-width: 400px) {
-    .sidebar {
-      width: 92vw;
-    }
-    .field-row {
-      grid-template-columns: 1fr;
-    }
-    header h1 { font-size: 11px; }
   }
 
   /* iPad横向き */
@@ -611,6 +648,9 @@
 
   <!-- 右：図面エリア -->
   <div class="canvas-area">
+    <div class="mobile-info" id="mobileInfo">
+      プレビューモード — PCで設定・図面生成を行ってください
+    </div>
     <div class="tab-bar">
       <div class="tab active" onclick="switchTab('draw')">図面プレビュー</div>
       <div class="tab" onclick="switchTab('ref')">参考図面</div>
@@ -957,6 +997,13 @@ function updateInfo(p) {
   `;
   document.getElementById('statusBar').innerHTML =
     `<span class="ok">✓ 生成完了</span><span>${p.face==='plan'?'平面図':'立面図'} — ${p.proj} ${p.site}</span><span>離れ: ${actualAo}mm（自動）</span><span>割付: ${spanDesc}</span><span>S=1:100</span>`;
+
+  // モバイル用情報バー更新
+  const mi = document.getElementById('mobileInfo');
+  if (mi) {
+    const faceName = {south:'南立面',north:'北立面',east:'東立面',west:'西立面',plan:'平面図'}[p.face];
+    mi.innerHTML = `<span>${faceName}</span> ${p.site||''} ｜ 割付: <span>${spanDesc}</span> ｜ 離れ: <span>${actualAo}mm</span>`;
+  }
 }
 
 // ============================================================
