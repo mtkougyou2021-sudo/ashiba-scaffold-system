@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>足場図面自動生成システム｜MT興業</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --panel: #1a1d27;
+    --border: #2a2d3a;
+    --accent: #e8a020;
+    --accent2: #4488ff;
+    --text: #e0e4f0;
+    --text-dim: #888ba0;
+    --success: #22cc88;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--panel);
+    border-bottom: 2px solid var(--accent);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header .logo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  header .badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+  }
+
+  .app {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 54px);
+  }
+
+  /* ===== 左パネル ===== */
+  .sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .field label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .field input, .field select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+  .field .unit {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #ffb830; transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--accent2);
+    color: #fff;
+    margin-top: 8px;
+  }
+  .btn-secondary:hover { background: #5599ff; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-size: 12px;
+    padding: 9px;
+  }
+  .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ドロップゾーン */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 6px;
+    padding: 20px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .drop-zone:hover {
+    border-color: var(--accent2);
+    background: rgba(68,136,255,0.05);
+  }
+  .drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(232,160,32,0.1);
+    border-style: solid;
+  }
+  .drop-zone .drop-icon {
+    font-size: 24px;
+    opacity: 0.6;
+  }
+  .drop-zone .drop-text {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .drop-zone .drop-text strong {
+    color: var(--accent2);
+    cursor: pointer;
+  }
+  .drop-zone input[type="file"] {
+    display: none;
+  }
+  .drop-zone .preview-container {
+    width: 100%;
+    position: relative;
+  }
+  .drop-zone .preview-container img {
+    max-width: 100%;
+    max-height: 120px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+  .drop-zone .file-name {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    word-break: break-all;
+  }
+  .remove-image {
+    background: rgba(255,50,50,0.8);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 10px;
+    padding: 2px 8px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .remove-image:hover { background: rgba(255,50,50,1); }
+
+  .overlay-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .overlay-controls label {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .overlay-controls input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent2);
+  }
+  .overlay-controls input[type="checkbox"] {
+    accent-color: var(--accent2);
+  }
+
+  .info-box {
+    background: rgba(68,136,255,0.08);
+    border: 1px solid rgba(68,136,255,0.25);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .info-box span { color: var(--accent); font-weight: 700; font-family: 'Share Tech Mono', monospace; }
+
+  /* ===== 右：図面エリア ===== */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #16181f;
+  }
+
+  .tab-bar {
+    display: flex;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    gap: 2px;
+  }
+  .tab {
+    padding: 10px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .drawing-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  #drawingCanvas {
+    background: white;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.6);
+    display: block;
+  }
+
+  .status-bar {
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    padding: 6px 16px;
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 24px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .status-bar .ok { color: var(--success); }
+
+  /* ===== ハンバーガーメニュー ===== */
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+  .menu-toggle:hover { background: rgba(232,160,32,0.15); }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+
+  /* ===== モバイル対応 ===== */
+  @media (max-width: 900px) {
+    .menu-toggle { display: block; }
+
+    header {
+      padding: 10px 14px;
+      gap: 10px;
+    }
+    header h1 { font-size: 13px; }
+    header .logo { font-size: 9px; letter-spacing: 2px; }
+
+    .app {
+      height: calc(100vh - 46px);
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 85vw;
+      max-width: 340px;
+      height: 100vh;
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      padding: 16px 14px;
+      padding-top: 60px;
+      border-right: 2px solid var(--accent);
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar-overlay.open {
+      display: block;
+    }
+
+    .canvas-area { width: 100%; }
+
+    .drawing-wrap {
+      padding: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #drawingCanvas {
+      max-width: none;
+    }
+
+    .tab-bar {
+      padding: 0 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab {
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+
+    .status-bar {
+      padding: 5px 10px;
+      font-size: 9px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .field input, .field select {
+      font-size: 16px;
+      padding: 10px 12px;
+    }
+
+    .btn {
+      padding: 14px;
+      font-size: 15px;
+    }
+
+    .drop-zone {
+      min-height: 60px;
+      padding: 14px 10px;
+    }
+
+    .info-box {
+      font-size: 10px;
+    }
+  }
+
+  /* iPhone SE等の小画面 */
+  @media (max-width: 400px) {
+    .sidebar {
+      width: 92vw;
+    }
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+    header h1 { font-size: 11px; }
+  }
+
+  /* iPad横向き */
+  @media (min-width: 901px) and (max-width: 1100px) {
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+    }
+  }
+
+  /* 印刷 */
+  @media print {
+    body { background: white; }
+    header, .sidebar, .sidebar-overlay, .tab-bar, .status-bar { display: none !important; }
+    .app { height: auto; display: block; }
+    .canvas-area { overflow: visible; }
+    .drawing-wrap { padding: 0; }
+    #drawingCanvas { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+  <div class="logo">MT興業</div>
+  <h1>足場図面自動生成システム</h1>
+  <div class="badge">くさび緊結式</div>
+</header>
+
+<div class="app">
+  <!-- サイドバー背景オーバーレイ（モバイル用） -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <!-- 左パネル -->
+  <div class="sidebar" id="sidebar">
+
+    <div>
+      <div class="section-title">建物図面読込</div>
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">📁</div>
+        <div class="drop-text">
+          建物図面をここにドラッグ＆ドロップ<br>
+          PNG / JPEG / PDF 対応<br>
+          または <strong id="browseBtn">ファイルを選択</strong>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,.pdf">
+      </div>
+      <div class="overlay-controls" id="overlayControls" style="display:none;">
+        <input type="checkbox" id="showOverlay" checked>
+        <label for="showOverlay">参考図を表示</label>
+        <label>透過:</label>
+        <input type="range" id="overlayOpacity" min="5" max="95" value="50">
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">建物寸法</div>
+      <div class="field-group">
+        <div class="field">
+          <label>建物幅（X方向）</label>
+          <input type="number" id="bldW" value="12000" step="100">
+          <div class="unit">mm</div>
+        </div>
+        <div class="field">
+          <label>建物奥行（Y方向）</label>
+          <input type="number" id="bldD" value="8000" step="100">
+          <div class="unit">mm</div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>1F階高</label>
+            <input type="number" id="h1f" value="2900" step="100">
+          </div>
+          <div class="field">
+            <label>2F階高</label>
+            <input type="number" id="h2f" value="2600" step="100">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>軒先高さ</label>
+            <input type="number" id="noki" value="7500" step="100">
+          </div>
+          <div class="field">
+            <label>棟高さ</label>
+            <input type="number" id="mune" value="9000" step="100">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">足場設定</div>
+      <div class="field-group">
+        <div class="field-row">
+          <div class="field">
+            <label>建物離れ（目標値・自動調整）</label>
+            <input type="number" id="ao" value="300" step="50">
+          </div>
+          <div class="field">
+            <label>足場幅</label>
+            <select id="aw">
+              <option value="400">400mm（一側）</option>
+              <option value="600">600mm（本足場）</option>
+              <option value="900" selected>900mm（標準）</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>支柱スパン</label>
+          <select id="span">
+            <option value="1800" selected>1,800mm（標準）</option>
+            <option value="1500">1,500mm</option>
+            <option value="1200">1,200mm</option>
+            <option value="900">900mm</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>足場天端（軒先+）</label>
+          <input type="number" id="topEx" value="1500" step="100">
+          <div class="unit">mm 上に出す</div>
+        </div>
+        <div class="field">
+          <label>図面スタイル</label>
+          <select id="style">
+            <option value="color">カラー版（橙布板・青手すり）</option>
+            <option value="mono">白黒版（実務提出用）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>表示面</label>
+          <select id="face">
+            <option value="south">南立面図</option>
+            <option value="north">北立面図</option>
+            <option value="east">東立面図</option>
+            <option value="west">西立面図</option>
+            <option value="plan">平面図（足場割付）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box" id="calcInfo">
+      建物を入力して生成してください
+    </div>
+
+    <div>
+      <button class="btn btn-primary" onclick="generate()">📐 図面を生成する</button>
+      <button class="btn btn-secondary" onclick="printPDF()">🖨 PDF出力（印刷）</button>
+      <button class="btn btn-outline" onclick="generateAll()">全4面を順番に確認</button>
+    </div>
+
+    <div>
+      <div class="section-title">図面情報</div>
+      <div class="field-group">
+        <div class="field">
+          <label>工事件名</label>
+          <input type="text" id="projName" value="外壁塗装工事" placeholder="工事件名">
+        </div>
+        <div class="field">
+          <label>現場名</label>
+          <input type="text" id="siteName" value="" placeholder="○○様邸">
+        </div>
+        <div class="field">
+          <label>作成日</label>
+          <input type="date" id="drawDate">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 右：図面エリア -->
+  <div class="canvas-area">
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('draw')">図面プレビュー</div>
+      <div class="tab" onclick="switchTab('ref')">参考図面</div>
+      <div class="tab" onclick="switchTab('spec')">仕様・数量</div>
+    </div>
+
+    <div class="drawing-wrap" id="drawWrap">
+      <canvas id="drawingCanvas" width="1200" height="800"></canvas>
+    </div>
+    <div class="drawing-wrap" id="refWrap" style="display:none;">
+      <div id="refPlaceholder" style="color:#888ba0; font-size:14px; text-align:center; padding:40px;">
+        左パネルの「建物図面読込」から画像またはPDFを読み込んでください
+      </div>
+      <img id="refImage" style="max-width:100%; max-height:100%; object-fit:contain; display:none;">
+    </div>
+
+    <div class="status-bar" id="statusBar">
+      <span>準備完了 — 左パネルで寸法を入力し「図面を生成する」を押してください</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  足場図面描画エンジン
+// ============================================================
+
+const canvas = document.getElementById('drawingCanvas');
+const ctx = canvas.getContext('2d');
+
+// 今日の日付をデフォルト設定
+document.getElementById('drawDate').valueAsDate = new Date();
+
+// ============================================================
+//  建物図面 読込（ドラッグ＆ドロップ / ファイル選択）
+// ============================================================
+let referenceImage = null;  // 読み込んだ画像（Image オブジェクト）
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const browseBtn = document.getElementById('browseBtn');
+const overlayControls = document.getElementById('overlayControls');
+const showOverlay = document.getElementById('showOverlay');
+const overlayOpacity = document.getElementById('overlayOpacity');
+
+// ファイル選択ボタン
+browseBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  fileInput.click();
+});
+dropZone.addEventListener('click', () => fileInput.click());
+
+// ファイル選択
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) loadImageFile(e.target.files[0]);
+});
+
+// ドラッグ＆ドロップ
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length > 0) loadImageFile(e.dataTransfer.files[0]);
+});
+
+// 画像読込処理
+function loadImageFile(file) {
+  const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  const isImage = file.type.startsWith('image/');
+
+  if (!isImage && !isPDF) {
+    alert('画像ファイル（PNG, JPG, BMP等）またはPDFを選択してください。');
+    return;
+  }
+
+  if (isPDF) {
+    loadPDFFile(file);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      setReferenceImage(img, e.target.result, file.name);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// PDF読込処理（1ページ目を画像化）
+function loadPDFFile(file) {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) }).promise;
+      const page = await pdf.getPage(1);
+      const scale = 2; // 高解像度で描画
+      const viewport = page.getViewport({ scale });
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = viewport.width;
+      offCanvas.height = viewport.height;
+      const offCtx = offCanvas.getContext('2d');
+      await page.render({ canvasContext: offCtx, viewport }).promise;
+
+      const dataUrl = offCanvas.toDataURL('image/png');
+      const img = new Image();
+      img.onload = () => {
+        setReferenceImage(img, dataUrl, file.name + '（1ページ目）');
+      };
+      img.src = dataUrl;
+    } catch (err) {
+      alert('PDFの読込に失敗しました: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// 参考画像をセット（共通処理）
+function setReferenceImage(img, previewSrc, fileName) {
+  referenceImage = img;
+  dropZone.innerHTML = `
+    <div class="preview-container">
+      <img src="${previewSrc}" alt="参考図面">
+      <div class="file-name">${fileName}</div>
+      <button class="remove-image" id="removeImage">削除</button>
+    </div>
+  `;
+  document.getElementById('removeImage').addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    removeReferenceImage();
+  });
+  overlayControls.style.display = 'flex';
+
+  // 参考図面タブに画像を表示
+  const refImg = document.getElementById('refImage');
+  const refPlaceholder = document.getElementById('refPlaceholder');
+  refImg.src = previewSrc;
+  refImg.style.display = 'block';
+  refPlaceholder.style.display = 'none';
+
+  generate();
+}
+
+function removeReferenceImage() {
+  referenceImage = null;
+  fileInput.value = '';
+  dropZone.innerHTML = `
+    <div class="drop-icon">📁</div>
+    <div class="drop-text">
+      建物図面をここにドラッグ＆ドロップ<br>
+      または <strong id="browseBtn">ファイルを選択</strong>
+    </div>
+    <input type="file" id="fileInput" accept="image/*,.pdf">
+  `;
+  // 再バインド
+  const newFileInput = document.getElementById('fileInput');
+  const newBrowseBtn = document.getElementById('browseBtn');
+  newBrowseBtn.addEventListener('click', (e) => { e.stopPropagation(); newFileInput.click(); });
+  newFileInput.addEventListener('change', (e) => { if(e.target.files.length>0) loadImageFile(e.target.files[0]); });
+  overlayControls.style.display = 'none';
+
+  // 参考図面タブもリセット
+  document.getElementById('refImage').style.display = 'none';
+  document.getElementById('refPlaceholder').style.display = 'block';
+
+  generate();
+}
+
+// 参考図をキャンバスに描画
+function drawReferenceOverlay() {
+  if (!referenceImage || !showOverlay.checked) return;
+  const opacity = parseInt(overlayOpacity.value) / 100;
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  // キャンバスの描画エリアにフィットさせる
+  const margin = 80;
+  const maxW = canvas.width - margin * 2;
+  const maxH = canvas.height - margin * 2;
+  const scale = Math.min(maxW / referenceImage.width, maxH / referenceImage.height);
+  const w = referenceImage.width * scale;
+  const h = referenceImage.height * scale;
+  const x = (canvas.width - w) / 2;
+  const y = (canvas.height - h) / 2;
+  ctx.drawImage(referenceImage, x, y, w, h);
+  ctx.restore();
+}
+
+// オーバーレイ設定変更時に再描画
+showOverlay.addEventListener('change', () => generate());
+overlayOpacity.addEventListener('input', () => generate());
+
+// ============================================================
+//  足場スパン自動割付計算
+// ============================================================
+function calculateLayout(buildingLen, targetOffset, standardSpan) {
+  const targetTotal = buildingLen + targetOffset * 2;
+
+  // 有効スパンの合計は必ず300の倍数になる（600,900,1200,1500,1800）
+  // targetTotalに最も近い300の倍数を探す（離れ最低200mm確保）
+  const roundUp   = Math.ceil(targetTotal / 300) * 300;
+  const roundDown = Math.floor(targetTotal / 300) * 300;
+  const minTotal  = buildingLen + 200 * 2;
+
+  let total;
+  if (roundDown >= minTotal && (targetTotal - roundDown) <= (roundUp - targetTotal)) {
+    total = roundDown;
+  } else {
+    total = roundUp;
+  }
+  if (total < minTotal) total = roundUp;
+  if (total < 600) total = Math.ceil(minTotal / 300) * 300;
+
+  // スパン分解: standardSpan で埋めて端数を処理
+  const spans = [];
+  const n = Math.floor(total / standardSpan);
+  const remainder = total - n * standardSpan;
+
+  if (remainder === 0) {
+    for (let i = 0; i < n; i++) spans.push(standardSpan);
+  } else if (remainder === 300) {
+    // 300は有効スパンでないので吸収
+    const merged = standardSpan + 300;
+    if (merged <= 1800) {
+      // 例: 1200+300=1500, 900+300=1200 → 有効スパン
+      for (let i = 0; i < n - 1; i++) spans.push(standardSpan);
+      spans.push(merged);
+    } else {
+      // standardSpan=1800 → 2100=1500+600 に分割
+      for (let i = 0; i < n - 1; i++) spans.push(standardSpan);
+      spans.push(1500);
+      spans.push(600);
+    }
+  } else {
+    // 600,900,1200,1500 → そのまま有効スパン
+    for (let i = 0; i < n; i++) spans.push(standardSpan);
+    spans.push(remainder);
+  }
+
+  const actualTotal = spans.reduce((a, b) => a + b, 0);
+  const totalOffset = actualTotal - buildingLen;
+  const offset = Math.round(totalOffset / 2);
+
+  // 支柱位置（建物左端=0 基準）
+  const positions = [];
+  let x = -offset;
+  positions.push(x);
+  for (const s of spans) {
+    x += s;
+    positions.push(Math.round(x));
+  }
+
+  return { totalLength: actualTotal, spans, offset, positions };
+}
+
+let currentFace = 'south';
+let allFaces = ['south','north','east','west'];
+let allFaceIdx = 0;
+
+function getParams() {
+  return {
+    bldW  : +document.getElementById('bldW').value,
+    bldD  : +document.getElementById('bldD').value,
+    h1f   : +document.getElementById('h1f').value,
+    h2f   : +document.getElementById('h2f').value,
+    noki  : +document.getElementById('noki').value,
+    mune  : +document.getElementById('mune').value,
+    ao    : +document.getElementById('ao').value,
+    aw    : +document.getElementById('aw').value,
+    span  : +document.getElementById('span').value,
+    topEx : +document.getElementById('topEx').value,
+    style : document.getElementById('style').value,
+    face  : document.getElementById('face').value,
+    proj  : document.getElementById('projName').value,
+    site  : document.getElementById('siteName').value,
+    date  : document.getElementById('drawDate').value,
+  };
+}
+
+function generate() {
+  const p = getParams();
+  currentFace = p.face;
+
+  // 自動割付計算（X方向=建物幅、Y方向=建物奥行）
+  p.layoutX = calculateLayout(p.bldW, p.ao, p.span);
+  p.layoutY = calculateLayout(p.bldD, p.ao, p.span);
+
+  if (p.face === 'plan') {
+    // 平面図は両方向の割付を使う
+    p.aoX = p.layoutX.offset;
+    p.aoY = p.layoutY.offset;
+  } else {
+    // 立面図は表示面に応じた割付を使う
+    const isNS = (p.face === 'south' || p.face === 'north');
+    const layout = isNS ? p.layoutX : p.layoutY;
+    p.ao = layout.offset;       // 実際の離れに上書き
+    p.pillarXs = layout.positions;
+    p.spanLayout = layout.spans;
+  }
+
+  updateInfo(p);
+  if (p.face === 'plan') {
+    drawPlan(p);
+  } else {
+    drawElevation(p, p.face);
+  }
+}
+
+function updateInfo(p) {
+  const atop = p.noki + p.topEx;
+  const isNS = (p.face==='south'||p.face==='north');
+  const layout = isNS ? p.layoutX : (p.face==='plan' ? p.layoutX : p.layoutY);
+  const layoutY = p.layoutY;
+  const floorCount = Math.ceil(atop / p.span);
+  const pillarCount = layout.positions.length;
+  const totalPillar = pillarCount * 2 + 4;
+
+  // スパン割付表示（例: "1800×4 + 1200"）
+  const spanCounts = {};
+  layout.spans.forEach(s => { spanCounts[s] = (spanCounts[s]||0) + 1; });
+  const spanDesc = Object.entries(spanCounts)
+    .sort((a,b) => +b[0] - +a[0])
+    .map(([s,c]) => c > 1 ? `${Number(s).toLocaleString()}×${c}` : `${Number(s).toLocaleString()}`)
+    .join(' + ');
+
+  const actualAo = p.face === 'plan' ? p.aoX : p.ao;
+  const targetAo = +document.getElementById('ao').value;
+
+  document.getElementById('calcInfo').innerHTML = `
+    足場天端: <span>${atop.toLocaleString()} mm</span><br>
+    段数: <span>${floorCount} 段</span>（層高 ${p.span}mm）<br>
+    スパン割付: <span>${spanDesc}</span><br>
+    建物離れ: <span>${actualAo} mm</span>（目標 ${targetAo}mm）<br>
+    足場幅: <span>${p.aw} mm</span> / 総幅: <span>${layout.totalLength.toLocaleString()} mm</span>
+  `;
+  document.getElementById('statusBar').innerHTML =
+    `<span class="ok">✓ 生成完了</span><span>${p.face==='plan'?'平面図':'立面図'} — ${p.proj} ${p.site}</span><span>離れ: ${actualAo}mm（自動）</span><span>割付: ${spanDesc}</span><span>S=1:100</span>`;
+}
+
+// ============================================================
+//  立面図描画
+// ============================================================
+function drawElevation(p, face) {
+  const isNS  = (face==='south'||face==='north');
+  const bw    = isNS ? p.bldW : p.bldD;
+  const atop  = p.noki + p.topEx;
+  const gl    = 500;
+  const isColor = p.style === 'color';
+
+  // キャンバスサイズ決定
+  const CW = 1200, CH = 820;
+  canvas.width = CW; canvas.height = CH;
+  const MARGIN_L = 180, MARGIN_R = 120, MARGIN_T = 90, MARGIN_B = 100;
+  const drawW = CW - MARGIN_L - MARGIN_R;
+  const drawH = CH - MARGIN_T - MARGIN_B;
+
+  // スケール: 足場込みの幅と高さに合わせる
+  const totalW = bw + (p.ao + p.aw) * 2 + 800;
+  const totalH = atop + gl + 800;
+  const sc = Math.min(drawW / totalW, drawH / totalH);
+
+  function mm(v) { return v * sc; }
+  const OX = MARGIN_L + mm(p.ao + p.aw + 400); // 原点X（建物左端）
+  const OY = CH - MARGIN_B - mm(gl);            // 原点Y（GL）
+
+  function px(v) { return OX + mm(v); }
+  function py(v) { return OY - mm(v); }
+
+  // 背景
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, CW, CH);
+
+  // 外枠
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(4, 4, CW-8, CH-8);
+
+  // タイトルエリア
+  const faceNames = {south:'南立面図',north:'北立面図',east:'東立面図',west:'西立面図'};
+  drawTitleBar(p, faceNames[face], CW, isColor);
+
+  // ===== GL線 =====
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(px(-p.ao-p.aw-500), py(0));
+  ctx.lineTo(px(bw+p.ao+p.aw+500), py(0));
+  ctx.stroke();
+
+  // GL ハッチ
+  ctx.strokeStyle = '#bbb';
+  ctx.lineWidth = 0.8;
+  for(let i=0;i<70;i++){
+    const xi = px(-p.ao-p.aw-450) + i*30;
+    ctx.beginPath(); ctx.moveTo(xi,py(0)); ctx.lineTo(xi-10,py(0)+10); ctx.stroke();
+  }
+
+  // 基礎
+  ctx.fillStyle = '#999';
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 2;
+  ctx.fillRect(px(0), py(gl), mm(bw), mm(gl));
+  ctx.strokeRect(px(0), py(gl), mm(bw), mm(gl));
+
+  // 足場エリア背景
+  if(isColor) {
+    ctx.fillStyle = 'rgba(240,248,255,0.8)';
+    ctx.fillRect(px(-p.ao), py(atop+200), mm(bw+p.ao*2), mm(atop+200));
+    ctx.fillStyle = 'rgba(220,235,255,0.8)';
+    ctx.fillRect(px(-p.ao-p.aw), py(atop+200), mm(p.aw), mm(atop+200));
+    ctx.fillRect(px(bw+p.ao), py(atop+200), mm(p.aw), mm(atop+200));
+  }
+
+  // 外壁
+  ctx.fillStyle = isColor ? '#ececec' : '#e0e0e0';
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 2.5;
+  ctx.fillRect(px(0), py(p.noki), mm(bw), mm(p.noki-gl));
+  ctx.strokeRect(px(0), py(p.noki), mm(bw), mm(p.noki-gl));
+
+  // 外壁ハッチ（白黒）
+  if(!isColor) {
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 0.5;
+    for(let h=0;h<mm(p.noki-gl);h+=7){
+      ctx.beginPath();
+      ctx.moveTo(px(0), py(p.noki)+h);
+      ctx.lineTo(px(bw), py(p.noki)+h);
+      ctx.stroke();
+    }
+  }
+
+  // 2FL線
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth = 0.8;
+  ctx.setLineDash([5,3]);
+  ctx.beginPath();
+  ctx.moveTo(px(-p.ao), py(gl+p.h1f)); ctx.lineTo(px(bw+p.ao), py(gl+p.h1f));
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#888';
+  ctx.font = '10px Noto Sans JP';
+  ctx.textAlign = 'right';
+  ctx.fillText('2F.L.', px(-p.ao)-4, py(gl+p.h1f)+4);
+
+  // 屋根
+  drawRoof(ctx, px, py, bw, p.noki, p.mune, isColor);
+
+  // 窓
+  drawWindows(ctx, px, py, mm, bw, p.h1f, gl, isNS, isColor);
+
+  // ===== 支柱位置計算（自動割付） =====
+  const pillarXs = p.pillarXs || (() => {
+    const xs = []; let xp = -p.ao;
+    while(xp <= bw+p.ao+1) { xs.push(Math.round(xp)); xp += p.span; }
+    if(xs[xs.length-1] < bw+p.ao) xs.push(bw+p.ao);
+    return xs;
+  })();
+  const outerXs = [pillarXs[0]-p.aw, pillarXs[pillarXs.length-1]+p.aw];
+  const allXs = [...new Set([...pillarXs,...outerXs])].sort((a,b)=>a-b);
+
+  // ===== 各段 描画 =====
+  let h = 0;
+  while(h <= atop+50) {
+    // 布板
+    drawFuriban(ctx, px, py, mm, p, bw, h, atop, isColor);
+    // 手すり
+    if(h > 0) drawTesuri(ctx, px, py, mm, p, bw, h, isColor);
+    h += p.span;
+  }
+
+  // ===== 支柱（縦線） =====
+  allXs.forEach(spx => {
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = outerXs.includes(spx) ? 3 : 2;
+    ctx.beginPath();
+    ctx.moveTo(px(spx), py(0));
+    ctx.lineTo(px(spx), py(atop+200));
+    ctx.stroke();
+  });
+
+  // ===== 筋交い =====
+  drawBrace(ctx, px, py, mm, pillarXs, outerXs, p, bw, atop, isColor);
+
+  // ===== くさびジョイント =====
+  allXs.forEach(spx => {
+    let h=0;
+    while(h<=atop+50){
+      ctx.beginPath();
+      ctx.arc(px(spx), py(h), isColor ? 4 : 4, 0, Math.PI*2);
+      ctx.fillStyle = isColor ? '#cc3300' : '#111';
+      ctx.fill();
+      h += p.span;
+    }
+  });
+
+  // ===== 壁つなぎ =====
+  const wtHeights = [gl+p.h1f*0.5, gl+p.h1f, gl+p.h1f+p.h2f*0.5, gl+p.h1f+p.h2f];
+  wtHeights.forEach(wh => {
+    if(wh > atop) return;
+    [[0,-1],[bw,1]].forEach(([wx,sign]) => {
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(px(wx), py(wh)); ctx.lineTo(px(wx+sign*p.ao), py(wh));
+      ctx.stroke();
+      // 壁つなぎ大●
+      ctx.beginPath();
+      ctx.arc(px(wx), py(wh), 10, 0, Math.PI*2);
+      ctx.fillStyle = 'black';
+      ctx.fill();
+    });
+  });
+
+  // ===== ジャッキベース =====
+  allXs.forEach(spx => {
+    ctx.fillStyle = '#444';
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 1;
+    ctx.fillRect(px(spx)-7, py(0), 14, 12);
+    ctx.strokeRect(px(spx)-7, py(0), 14, 12);
+  });
+
+  // ===== 防護ネット =====
+  ctx.strokeStyle = isColor ? '#888' : '#aaa';
+  ctx.lineWidth = 0.7;
+  ctx.setLineDash([2,2]);
+  ctx.strokeRect(px(-p.ao-p.aw), py(atop+200), mm(p.aw), mm(atop+200));
+  ctx.strokeRect(px(bw+p.ao), py(atop+200), mm(p.aw), mm(atop+200));
+  ctx.setLineDash([]);
+
+  // ===== 寸法線 =====
+  drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B);
+
+  // 高さラベル（左）
+  drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor);
+
+  // ===== FL番号（左側） =====
+  let flH = gl, flN = 1;
+  ctx.font = 'bold 10px Share Tech Mono';
+  ctx.fillStyle = '#555';
+  ctx.textAlign = 'right';
+  while(flH <= atop+p.span) {
+    ctx.fillText(`${flN}FL`, px(-p.ao-p.aw)-58, py(flH)+4);
+    flH += p.span; flN++;
+  }
+
+  // ===== 引出線ラベル（カラー版） =====
+  if(isColor) {
+    drawCallouts(ctx, px, py, p, bw, atop);
+  }
+
+  // ===== 凡例 =====
+  drawLegend(ctx, CW, CH, isColor);
+
+  // ===== 参考図面オーバーレイ（最前面に描画） =====
+  drawReferenceOverlay();
+}
+
+// ============================================================
+function drawRoof(ctx, px, py, bw, noki, mune, isColor) {
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(noki));
+  ctx.lineTo(px(bw/2), py(mune));
+  ctx.lineTo(px(bw), py(noki));
+  ctx.closePath();
+  ctx.fillStyle = isColor ? '#888' : '#999';
+  ctx.fill();
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  // ハッチング
+  const steps = 20;
+  ctx.strokeStyle = isColor ? '#666' : '#666';
+  ctx.lineWidth = 0.6;
+  for(let i=1;i<steps;i++){
+    const t = i/steps;
+    const lx = px(0) + t*(px(bw/2)-px(0));
+    const ly = py(noki) + t*(py(mune)-py(noki));
+    const rx = px(bw) - t*(px(bw)-px(bw/2));
+    const ry = py(noki) + t*(py(mune)-py(noki));
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(px(bw/2),py(mune)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(px(bw/2),py(mune)); ctx.stroke();
+  }
+}
+
+function drawWindows(ctx, px, py, mm, bw, h1f, gl, isNS, isColor) {
+  let wins;
+  if(isNS) {
+    wins = [
+      [600, gl+900, 2400, 1200],
+      [bw-600-1200, gl+900, 1200, 1200],
+      [600, gl+h1f+800, 2400, 1200],
+      [bw-600-2400, gl+h1f+800, 2400, 1200],
+    ];
+  } else {
+    wins = [
+      [400, gl+1000, 1200, 1000],
+      [bw-400-1500, gl+900, 1500, 1200],
+      [300, gl+h1f+700, 2700, 900],
+    ];
+  }
+  wins.forEach(([wx,wy,ww,wh]) => {
+    if(wx < 0 || wx+ww > bw) return;
+    ctx.fillStyle = isColor ? '#87ceeb' : 'white';
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1.8;
+    ctx.fillRect(px(wx), py(wy+wh), mm(ww), mm(wh));
+    ctx.strokeRect(px(wx), py(wy+wh), mm(ww), mm(wh));
+    if(ww >= 2000) {
+      ctx.beginPath();
+      ctx.moveTo(px(wx+ww/2), py(wy));
+      ctx.lineTo(px(wx+ww/2), py(wy+wh));
+      ctx.stroke();
+    }
+  });
+}
+
+function drawFuriban(ctx, px, py, mm, p, bw, h, atop, isColor) {
+  // 建物前面布板
+  if(isColor) {
+    ctx.fillStyle = '#ff8c00';
+    ctx.strokeStyle = '#cc5500';
+    ctx.lineWidth = 0.8;
+    ctx.fillRect(px(-p.ao), py(h)-4, mm(bw+p.ao*2), 8);
+    ctx.strokeRect(px(-p.ao), py(h)-4, mm(bw+p.ao*2), 8);
+    // 左右外側
+    ctx.fillRect(px(-p.ao-p.aw), py(h)-4, mm(p.aw), 8);
+    ctx.strokeRect(px(-p.ao-p.aw), py(h)-4, mm(p.aw), 8);
+    ctx.fillRect(px(bw+p.ao), py(h)-4, mm(p.aw), 8);
+    ctx.strokeRect(px(bw+p.ao), py(h)-4, mm(p.aw), 8);
+  } else {
+    ctx.fillStyle = '#333';
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 0.5;
+    [[px(-p.ao-p.aw), mm(bw+p.ao*2+p.aw*2)]].forEach(([sx,sw]) => {
+      ctx.fillRect(sx, py(h)-4, sw, 8);
+    });
+  }
+}
+
+function drawTesuri(ctx, px, py, mm, p, bw, h, isColor) {
+  // 外手すり（上段）
+  const hr1 = h - p.span * 0.12;
+  // 中間手すり
+  const hr2 = h - p.span * 0.45;
+  [hr1, hr2].forEach((hr, idx) => {
+    ctx.strokeStyle = isColor ? (idx===0 ? '#1144cc' : '#5577ee') : '#333';
+    ctx.lineWidth = isColor ? (idx===0 ? 2.5 : 1.5) : 1.2;
+    ctx.beginPath();
+    ctx.moveTo(px(-p.ao-p.aw), py(hr));
+    ctx.lineTo(px(bw+p.ao+p.aw), py(hr));
+    ctx.stroke();
+  });
+}
+
+function drawBrace(ctx, px, py, mm, pillarXs, outerXs, p, bw, atop, isColor) {
+  ctx.strokeStyle = isColor ? '#555' : '#444';
+  ctx.lineWidth = 1;
+
+  // 建物前面 筋交い（×）
+  for(let i=0;i<pillarXs.length-1;i++){
+    const x1=pillarXs[i], x2=pillarXs[i+1];
+    let h=0;
+    while(h+p.span<=atop+50){
+      // ×
+      ctx.beginPath(); ctx.moveTo(px(x1),py(h)); ctx.lineTo(px(x2),py(h+p.span)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(x2),py(h)); ctx.lineTo(px(x1),py(h+p.span)); ctx.stroke();
+      h += p.span*2; // 1スパンおき
+    }
+  }
+
+  // 左右外側 筋交い（×）
+  ctx.lineWidth = 1.2;
+  let h=0;
+  while(h+p.span<=atop+50){
+    // 左
+    ctx.beginPath(); ctx.moveTo(px(-p.ao-p.aw),py(h)); ctx.lineTo(px(-p.ao),py(h+p.span)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(-p.ao),py(h)); ctx.lineTo(px(-p.ao-p.aw),py(h+p.span)); ctx.stroke();
+    // 右
+    ctx.beginPath(); ctx.moveTo(px(bw+p.ao),py(h)); ctx.lineTo(px(bw+p.ao+p.aw),py(h+p.span)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(bw+p.ao+p.aw),py(h)); ctx.lineTo(px(bw+p.ao),py(h+p.span)); ctx.stroke();
+    h += p.span;
+  }
+}
+
+function drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B) {
+  ctx.strokeStyle = '#333';
+  ctx.fillStyle = '#333';
+  ctx.lineWidth = 1;
+  ctx.font = '10px Share Tech Mono';
+
+  // 水平寸法（下）— 自動割付スパンを表示
+  const yBot = CH - MARGIN_B + 35;
+  if (p.pillarXs && p.pillarXs.length > 1) {
+    for (let i = 0; i < p.pillarXs.length - 1; i++) {
+      const spanW = p.pillarXs[i+1] - p.pillarXs[i];
+      drawDimH(ctx, px(p.pillarXs[i]), px(p.pillarXs[i+1]), yBot, `${spanW.toLocaleString()}`);
+    }
+  }
+  // 外側（足場幅）
+  const leftInner = p.pillarXs ? p.pillarXs[0] : -p.ao;
+  const rightInner = p.pillarXs ? p.pillarXs[p.pillarXs.length-1] : bw+p.ao;
+  drawDimH(ctx, px(leftInner-p.aw), px(leftInner), yBot, `${p.aw}`);
+  drawDimH(ctx, px(rightInner), px(rightInner+p.aw), yBot, `${p.aw}`);
+  // 全幅
+  drawDimH(ctx, px(0), px(bw), yBot+22, `${bw.toLocaleString()}`);
+
+  // 垂直寸法（右）
+  let xR = px(bw+p.ao+p.aw) + 25;
+  let h=0;
+  while(h+p.span<=atop+50){
+    const nh=Math.min(h+p.span,atop);
+    drawDimV(ctx, xR, py(h), py(nh), `${(nh-h).toLocaleString()}`);
+    xR += 20; h = nh;
+  }
+}
+
+function drawDimH(ctx, x1, x2, y, label) {
+  ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1,y-5); ctx.lineTo(x1,y+5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y-5); ctx.lineTo(x2,y+5); ctx.stroke();
+  ctx.textAlign = 'center';
+  ctx.fillText(label, (x1+x2)/2, y+15);
+}
+
+function drawDimV(ctx, x, y1, y2, label) {
+  ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x-5,y1); ctx.lineTo(x+5,y1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x-5,y2); ctx.lineTo(x+5,y2); ctx.stroke();
+  ctx.save();
+  ctx.translate(x-14, (y1+y2)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign = 'center';
+  ctx.fillText(label, 0, 0);
+  ctx.restore();
+}
+
+function drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor) {
+  const labels = [
+    [p.noki,   '▼軒先 ' + p.noki.toLocaleString(), '#333'],
+    [p.mune,   '▼棟 ' + p.mune.toLocaleString(), '#555'],
+    [atop,     '▼足場天端 ' + atop.toLocaleString(), isColor?'#0044bb':'#333'],
+    [gl+p.h1f, '▼2F.L.', '#888'],
+  ];
+  labels.forEach(([yval,label,col]) => {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([4,3]);
+    ctx.beginPath();
+    ctx.moveTo(px(0), py(yval));
+    ctx.lineTo(px(0)-40, py(yval));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = col;
+    ctx.font = '10px Noto Sans JP';
+    ctx.textAlign = 'right';
+    ctx.fillText(label, px(0)-44, py(yval)+4);
+  });
+  ctx.fillStyle = '#111';
+  ctx.font = '10px Noto Sans JP';
+  ctx.textAlign = 'left';
+  ctx.fillText('▼G.L.±0', px(0)+4, py(0)+14);
+}
+
+function drawCallouts(ctx, px, py, p, bw, atop) {
+  const items = [
+    [bw+p.ao+p.aw-100, atop+150, bw+p.ao+p.aw+120, atop+80, '壁つなぎ用手摺'],
+    [bw+p.ao,           atop-p.span*0.12, bw+p.ao+p.aw+150, atop-p.span*0.12+50, '外手摺'],
+    [bw+p.ao,           atop-p.span*0.45, bw+p.ao+p.aw+150, atop-p.span*0.45+50, '中間手摺'],
+    [bw+p.ao+p.aw,      atop-p.span,     bw+p.ao+p.aw+160, atop-p.span+60, 'クサビ支柱'],
+  ];
+  ctx.font = '11px Noto Sans JP';
+  items.forEach(([x1,y1,x2,y2,lbl]) => {
+    ctx.strokeStyle = '#cc0000';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px(0)+x1*0, py(0)); ctx.stroke(); // noop
+    // 簡易引出線
+    ctx.beginPath();
+    const sx=px(0)+10, sy=py(y1-p.noki);
+    ctx.moveTo(sx,sy); ctx.lineTo(sx+40,sy-20);
+    ctx.stroke();
+    ctx.fillStyle = '#cc0000';
+    ctx.textAlign = 'left';
+    ctx.fillText(lbl, sx+44, sy-16);
+    ctx.beginPath(); ctx.arc(sx,sy,3,0,Math.PI*2); ctx.fill();
+  });
+}
+
+function drawLegend(ctx, CW, CH, isColor) {
+  const lx = CW - 175, ly = 72;
+  ctx.fillStyle = '#fafafa';
+  ctx.strokeStyle = '#ccc';
+  ctx.lineWidth = 1;
+  ctx.fillRect(lx-6, ly-14, 168, isColor?110:90);
+  ctx.strokeRect(lx-6, ly-14, 168, isColor?110:90);
+
+  ctx.font = '10px Noto Sans JP';
+  if(isColor) {
+    // 布板
+    ctx.fillStyle = '#ff8c00'; ctx.fillRect(lx, ly, 28, 7); ctx.strokeStyle='#cc5500'; ctx.lineWidth=0.8; ctx.strokeRect(lx,ly,28,7);
+    ctx.fillStyle='#333'; ctx.textAlign='left'; ctx.fillText('布板', lx+34, ly+8);
+    // 外手すり
+    ctx.strokeStyle='#1144cc'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(lx,ly+22); ctx.lineTo(lx+28,ly+22); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText('外手摺', lx+34, ly+26);
+    // 中間手すり
+    ctx.strokeStyle='#5577ee'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(lx,ly+38); ctx.lineTo(lx+28,ly+38); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText('中間手摺', lx+34, ly+42);
+    // ジョイント
+    ctx.fillStyle='#cc3300'; ctx.beginPath(); ctx.arc(lx+14,ly+56,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#333'; ctx.fillText('くさびジョイント', lx+34, ly+60);
+    // 壁つなぎ
+    ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(lx+14,ly+76,9,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#333'; ctx.fillText('壁つなぎ', lx+34, ly+80);
+    // 筋交い
+    ctx.strokeStyle='#555'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(lx,ly+92); ctx.lineTo(lx+28,ly+100); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lx+28,ly+92); ctx.lineTo(lx,ly+100); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText('筋交い', lx+34, ly+98);
+  } else {
+    ctx.fillStyle='#333'; ctx.fillRect(lx,ly,28,7); ctx.fillText('布板・水平材', lx+34, ly+8);
+    ctx.strokeStyle='#333'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(lx,ly+22); ctx.lineTo(lx+28,ly+22); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText('手摺', lx+34, ly+26);
+    ctx.strokeStyle='#444'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(lx,ly+36); ctx.lineTo(lx+28,ly+44); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lx+28,ly+36); ctx.lineTo(lx,ly+44); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText('筋交い', lx+34, ly+42);
+    ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(lx+14,ly+58,9,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#333'; ctx.fillText('壁つなぎ', lx+34, ly+62);
+    ctx.fillStyle='#444'; ctx.beginPath(); ctx.arc(lx+14,ly+76,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#333'; ctx.fillText('ジョイント', lx+34, ly+80);
+  }
+}
+
+function drawTitleBar(p, faceName, CW, isColor) {
+  // タイトル背景
+  ctx.fillStyle = isColor ? '#1a252f' : '#333';
+  ctx.fillRect(4, 4, CW-8, 56);
+
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 16px Noto Sans JP';
+  ctx.textAlign = 'center';
+  ctx.fillText(faceName + '（足場割付立面図）　S=1:100', CW/2, 28);
+
+  ctx.font = '10px Noto Sans JP';
+  ctx.fillStyle = '#aaa';
+  const proj = document.getElementById('projName').value;
+  const site = document.getElementById('siteName').value;
+  const date = document.getElementById('drawDate').value;
+  ctx.fillText(`MT興業　${proj}　${site}　作成日：${date}`, CW/2, 50);
+}
+
+// ============================================================
+//  平面図
+// ============================================================
+function drawPlan(p) {
+  const aoX = p.aoX || p.layoutX.offset;
+  const aoY = p.aoY || p.layoutY.offset;
+  const lxPositions = p.layoutX.positions;
+  const lyPositions = p.layoutY.positions;
+
+  const CW=1200, CH=900;
+  canvas.width=CW; canvas.height=CH;
+  const ML=160,MR=120,MT=90,MB=120;
+  const drawW=CW-ML-MR, drawH=CH-MT-MB;
+  const totalW = p.bldW+(aoX+p.aw)*2+800;
+  const totalH = p.bldD+(aoY+p.aw)*2+800;
+  const sc = Math.min(drawW/totalW, drawH/totalH);
+
+  function mm(v){ return v*sc; }
+  const OX=ML+mm(aoX+p.aw+400);
+  const OY=MT+mm(aoY+p.aw+400);
+  function px(v){ return OX+mm(v); }
+  function py(v){ return OY+mm(v); }
+
+  ctx.fillStyle='white'; ctx.fillRect(0,0,CW,CH);
+  ctx.strokeStyle='#222'; ctx.lineWidth=2; ctx.strokeRect(4,4,CW-8,CH-8);
+  drawTitleBar(p,'平面図', CW, p.style==='color');
+
+  const isColor = p.style==='color';
+
+  // 足場外側塗り
+  if(isColor){
+    ctx.fillStyle='rgba(220,235,255,0.6)';
+    ctx.fillRect(px(-aoX-p.aw),py(-aoY-p.aw), mm(p.bldW+(aoX+p.aw)*2), mm(p.bldD+(aoY+p.aw)*2));
+    ctx.fillStyle='white';
+    ctx.fillRect(px(-aoX),py(-aoY), mm(p.bldW+aoX*2), mm(p.bldD+aoY*2));
+  }
+
+  // 足場外側枠
+  ctx.strokeStyle=isColor?'#0044cc':'#222'; ctx.lineWidth=2;
+  ctx.strokeRect(px(-aoX-p.aw),py(-aoY-p.aw), mm(p.bldW+(aoX+p.aw)*2), mm(p.bldD+(aoY+p.aw)*2));
+  // 足場内側枠（離れ）
+  ctx.setLineDash([6,3]);
+  ctx.strokeStyle=isColor?'#0044cc':'#555'; ctx.lineWidth=1.2;
+  ctx.strokeRect(px(-aoX),py(-aoY), mm(p.bldW+aoX*2), mm(p.bldD+aoY*2));
+  ctx.setLineDash([]);
+
+  // 建物外壁
+  ctx.fillStyle=isColor?'#f0f0f0':'#e0e0e0';
+  ctx.strokeStyle='black'; ctx.lineWidth=3;
+  ctx.fillRect(px(0),py(0), mm(p.bldW), mm(p.bldD));
+  ctx.strokeRect(px(0),py(0), mm(p.bldW), mm(p.bldD));
+
+  // 対角線（屋根）
+  ctx.strokeStyle='#ccc'; ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.moveTo(px(0),py(0)); ctx.lineTo(px(p.bldW),py(p.bldD)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px(p.bldW),py(0)); ctx.lineTo(px(0),py(p.bldD)); ctx.stroke();
+
+  // 通り芯
+  ctx.strokeStyle='#f00'; ctx.lineWidth=0.7; ctx.setLineDash([10,5,2,5]);
+  [0,p.bldW].forEach(cx=>{
+    ctx.beginPath(); ctx.moveTo(px(cx),py(-aoY-p.aw-300)); ctx.lineTo(px(cx),py(p.bldD+aoY+p.aw+300)); ctx.stroke();
+  });
+  [0,p.bldD].forEach(cy=>{
+    ctx.beginPath(); ctx.moveTo(px(-aoX-p.aw-300),py(cy)); ctx.lineTo(px(p.bldW+aoX+p.aw+300),py(cy)); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // 布板パネル描画（足場幅に応じたパターン）
+  // 400mm → 斜線1本(/)  600mm → バッテン(×)  900mm → ダブルバッテン(××)
+  const panelColor = isColor ? '#ff8c00' : '#555';
+  const panelBorder = isColor ? '#cc5500' : '#333';
+  const panelFill = isColor ? 'rgba(255,140,0,0.12)' : 'rgba(100,100,100,0.06)';
+
+  // パネル1枚を描画するヘルパー（x1,y1=左上, x2,y2=右下 実座標mm）
+  function drawPanel(x1, y1, x2, y2) {
+    const sx1=px(x1), sy1=py(y1), sx2=px(x2), sy2=py(y2);
+    // 背景塗り
+    ctx.fillStyle = panelFill;
+    ctx.fillRect(sx1, sy1, sx2-sx1, sy2-sy1);
+    // 枠線
+    ctx.strokeStyle = panelBorder;
+    ctx.lineWidth = isColor ? 1.5 : 1;
+    ctx.strokeRect(sx1, sy1, sx2-sx1, sy2-sy1);
+    // パターン描画
+    ctx.strokeStyle = panelColor;
+    ctx.lineWidth = isColor ? 1.8 : 1.2;
+    if (p.aw <= 400) {
+      // 斜線1本
+      ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
+    } else if (p.aw <= 600) {
+      // バッテン（×）
+      ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(sx1,sy2); ctx.stroke();
+    } else {
+      // ダブルバッテン（××）：中央で分割して×を2つ
+      const midX = (sx1+sx2)/2, midY = (sy1+sy2)/2;
+      // 分割線
+      if (Math.abs(sx2-sx1) > Math.abs(sy2-sy1)) {
+        // 横長パネル → 左右に分割
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx1,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+      } else {
+        // 縦長パネル → 上下に分割
+        ctx.beginPath(); ctx.moveTo(sx1,midY); ctx.lineTo(sx2,midY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,midY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(sx1,midY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx1,midY); ctx.lineTo(sx2,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,midY); ctx.lineTo(sx1,sy2); ctx.stroke();
+      }
+    }
+  }
+
+  // 南面パネル（X方向スパン × 足場幅、建物の南側）
+  for (let i = 0; i < lxPositions.length - 1; i++) {
+    drawPanel(lxPositions[i], -aoY-p.aw, lxPositions[i+1], -aoY);
+  }
+  // 北面パネル
+  for (let i = 0; i < lxPositions.length - 1; i++) {
+    drawPanel(lxPositions[i], p.bldD+aoY, lxPositions[i+1], p.bldD+aoY+p.aw);
+  }
+  // 西面パネル（Y方向スパン × 足場幅）
+  for (let i = 0; i < lyPositions.length - 1; i++) {
+    drawPanel(-aoX-p.aw, lyPositions[i], -aoX, lyPositions[i+1]);
+  }
+  // 東面パネル
+  for (let i = 0; i < lyPositions.length - 1; i++) {
+    drawPanel(p.bldW+aoX, lyPositions[i], p.bldW+aoX+p.aw, lyPositions[i+1]);
+  }
+
+  // 支柱（パネルの上に描画）
+  const drawPillar = (xp, yp) => {
+    ctx.beginPath(); ctx.arc(px(xp),py(yp),mm(70),0,Math.PI*2);
+    ctx.fillStyle='white'; ctx.fill();
+    ctx.strokeStyle=isColor?'#0044cc':'#222'; ctx.lineWidth=1.5; ctx.stroke();
+  };
+  const yRowPositions = [-aoY, p.bldD+aoY, -aoY-p.aw, p.bldD+aoY+p.aw];
+  yRowPositions.forEach(yp => {
+    lxPositions.forEach(xp => drawPillar(xp, yp));
+  });
+  const xColPositions = [-aoX, p.bldW+aoX, -aoX-p.aw, p.bldW+aoX+p.aw];
+  xColPositions.forEach(xp => {
+    lyPositions.forEach(yp => drawPillar(xp, yp));
+  });
+
+  // 壁つなぎ（×）
+  [[0,p.bldD/4],[0,p.bldD/2],[0,p.bldD*3/4],[p.bldW,p.bldD/4],[p.bldW,p.bldD/2],[p.bldW,p.bldD*3/4]].forEach(([wx,wy])=>{
+    const s=mm(200);
+    ctx.strokeStyle=isColor?'#cc6600':'#555'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(px(wx)-s,py(wy)-s); ctx.lineTo(px(wx)+s,py(wy)+s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(wx)+s,py(wy)-s); ctx.lineTo(px(wx)-s,py(wy)+s); ctx.stroke();
+  });
+
+  // 寸法
+  ctx.strokeStyle='#333'; ctx.fillStyle='#333'; ctx.lineWidth=1; ctx.font='10px Share Tech Mono';
+  const yBot = py(p.bldD+aoY+p.aw)+30;
+  drawDimH(ctx, px(0),px(p.bldW),yBot,`${p.bldW.toLocaleString()}`);
+  drawDimH(ctx, px(-aoX-p.aw),px(p.bldW+aoX+p.aw),yBot+22,`${(p.bldW+(aoX+p.aw)*2).toLocaleString()}`);
+  const xR = px(p.bldW+aoX+p.aw)+30;
+  drawDimV(ctx, xR, py(0),py(p.bldD),`${p.bldD.toLocaleString()}`);
+  drawDimV(ctx, xR+22, py(-aoY-p.aw),py(p.bldD+aoY+p.aw),`${(p.bldD+(aoY+p.aw)*2).toLocaleString()}`);
+
+  // スパン寸法（上）— X方向割付を表示
+  for (let i = 0; i < lxPositions.length - 1; i++) {
+    const spanW = lxPositions[i+1] - lxPositions[i];
+    drawDimH(ctx, px(lxPositions[i]), px(lxPositions[i+1]), py(-aoY-p.aw)-18, `${spanW.toLocaleString()}`);
+  }
+
+  // 北方向矢印
+  const ax=CW-60,ay=CH-90;
+  ctx.fillStyle='black';
+  ctx.beginPath(); ctx.moveTo(ax,ay-28); ctx.lineTo(ax-10,ay); ctx.lineTo(ax+10,ay); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='black'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(ax,ay-28); ctx.lineTo(ax,ay+5); ctx.stroke();
+  ctx.font='bold 14px Noto Sans JP'; ctx.fillStyle='black'; ctx.textAlign='center';
+  ctx.fillText('N', ax, ay+22);
+
+  drawLegend(ctx, CW, CH, isColor);
+
+  // ===== 参考図面オーバーレイ（最前面に描画） =====
+  drawReferenceOverlay();
+}
+
+// ============================================================
+function printPDF() {
+  window.print();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('drawWrap').style.display = (tab === 'draw') ? 'flex' : 'none';
+  document.getElementById('refWrap').style.display  = (tab === 'ref')  ? 'flex' : 'none';
+}
+
+function generateAll() {
+  const faces = ['south','north','east','west','plan'];
+  let idx = 0;
+  function next() {
+    if(idx>=faces.length) return;
+    document.getElementById('face').value = faces[idx];
+    generate();
+    idx++;
+    if(idx<faces.length) setTimeout(next, 500);
+  }
+  next();
+}
+
+// ============================================================
+//  モバイル対応
+// ============================================================
+
+// サイドバー開閉
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+// サイドバー内のボタン押下後に自動で閉じる（モバイル時）
+function closeSidebarIfMobile() {
+  if (window.innerWidth <= 900) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+}
+
+// 生成ボタンのラッパー（モバイルで自動閉じ）
+const origGenerate = generate;
+document.querySelector('.btn-primary').onclick = () => {
+  origGenerate();
+  closeSidebarIfMobile();
+};
+
+// キャンバスのピンチズーム・パン操作
+(function setupCanvasTouch() {
+  const wrap = document.getElementById('drawWrap');
+  let scale = 1, originX = 0, originY = 0;
+  let lastDist = 0, lastX = 0, lastY = 0;
+  let isPinching = false;
+
+  wrap.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      isPinching = true;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastDist = Math.sqrt(dx*dx + dy*dy);
+      lastX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      lastY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && isPinching) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+      // ズーム
+      const dScale = dist / lastDist;
+      scale = Math.min(5, Math.max(0.5, scale * dScale));
+
+      // パン
+      originX += midX - lastX;
+      originY += midY - lastY;
+
+      canvas.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+      canvas.style.transformOrigin = '0 0';
+
+      lastDist = dist;
+      lastX = midX;
+      lastY = midY;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) isPinching = false;
+  });
+
+  // ダブルタップでリセット
+  let lastTap = 0;
+  wrap.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        scale = 1; originX = 0; originY = 0;
+        canvas.style.transform = '';
+        e.preventDefault();
+      }
+      lastTap = now;
+    }
+  });
+})();
+
+// 初回生成
+window.onload = () => { generate(); };
+</script>
+</body>
+</html>
