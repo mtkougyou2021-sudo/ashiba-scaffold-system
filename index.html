@@ -264,6 +264,143 @@
   }
   .info-box span { color: var(--accent); font-weight: 700; font-family: 'Share Tech Mono', monospace; }
 
+  /* イレギュラー段設定 */
+  .irregular-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+  .irregular-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(232,160,32,0.06);
+    border: 1px solid rgba(232,160,32,0.2);
+    border-radius: 4px;
+    padding: 4px 6px;
+  }
+  .irregular-row select, .irregular-row input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 4px 5px;
+    outline: none;
+  }
+  .irregular-row select { width: 68px; }
+  .irregular-row input { width: 70px; }
+  .irregular-row select:focus, .irregular-row input:focus { border-color: var(--accent); }
+  .irregular-row .unit-sm { font-size: 9px; color: var(--text-dim); }
+  .irregular-row .btn-del {
+    background: rgba(255,50,50,0.2);
+    border: 1px solid rgba(255,50,50,0.4);
+    color: #ff6666;
+    font-size: 14px;
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+  }
+  .irregular-row .btn-del:hover { background: rgba(255,50,50,0.4); }
+
+  .btn-add-irregular {
+    width: 100%;
+    padding: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: rgba(68,136,255,0.1);
+    border: 1px dashed var(--accent2);
+    border-radius: 4px;
+    color: var(--accent2);
+    cursor: pointer;
+    margin-top: 4px;
+    transition: all 0.2s;
+  }
+  .btn-add-irregular:hover { background: rgba(68,136,255,0.2); }
+
+  .floor-preview {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    line-height: 1.6;
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: var(--bg);
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    max-height: 100px;
+    overflow-y: auto;
+  }
+  .floor-preview .irregular-mark { color: var(--accent); font-weight: 700; }
+
+  /* マーキングツールバー */
+  .markup-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 10px;
+    flex-wrap: wrap;
+  }
+  .markup-bar .markup-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .markup-bar .markup-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .markup-bar .markup-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .markup-bar .markup-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+  .markup-bar input[type="color"] {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px;
+    cursor: pointer;
+    background: var(--bg);
+  }
+  .markup-bar select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-size: 11px;
+    padding: 4px 6px;
+    cursor: pointer;
+  }
+  .markup-bar .markup-label {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .canvas-container {
+    position: relative;
+    display: inline-block;
+  }
+  #markupCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
   /* ===== 右：図面エリア ===== */
   .canvas-area {
     flex: 1;
@@ -568,17 +705,38 @@
     <div>
       <div class="section-title">足場設定</div>
       <div class="field-group">
-        <div class="field-row">
-          <div class="field">
-            <label>建物離れ（目標値・自動調整）</label>
-            <input type="number" id="ao" value="300" step="50">
+        <div class="field">
+          <label>壁離れ（東西南北）</label>
+          <div class="field-row">
+            <div class="field">
+              <label>北壁離れ</label>
+              <input type="number" id="aoN" value="300" step="50">
+            </div>
+            <div class="field">
+              <label>南壁離れ</label>
+              <input type="number" id="aoS" value="300" step="50">
+            </div>
           </div>
+          <div class="field-row">
+            <div class="field">
+              <label>東壁離れ</label>
+              <input type="number" id="aoE" value="300" step="50">
+            </div>
+            <div class="field">
+              <label>西壁離れ</label>
+              <input type="number" id="aoW" value="300" step="50">
+            </div>
+          </div>
+          <div class="unit">mm（目標値・自動調整）</div>
+        </div>
+        <div class="field-row">
           <div class="field">
             <label>足場幅</label>
             <select id="aw">
               <option value="400">400mm（一側）</option>
               <option value="600">600mm（本足場）</option>
               <option value="900" selected>900mm（標準）</option>
+              <option value="1200">1,200mm（広幅）</option>
             </select>
           </div>
         </div>
@@ -592,9 +750,23 @@
           </select>
         </div>
         <div class="field">
+          <label>ジャッキベース高さ</label>
+          <input type="number" id="jackBase" value="300" step="50" min="0">
+          <div class="unit">mm（GLからの高さ）</div>
+        </div>
+        <div class="field">
           <label>足場天端（軒先+）</label>
           <input type="number" id="topEx" value="1500" step="100">
           <div class="unit">mm 上に出す</div>
+        </div>
+        <div class="field">
+          <label>手摺の種類</label>
+          <select id="tesuriType">
+            <option value="senkou2" selected>先行手摺（バッテン）</option>
+            <option value="tesuri2">手摺2本（手摺+中桟）</option>
+            <option value="tesuri1">手摺1本（手摺のみ）</option>
+            <option value="none">手摺なし</option>
+          </select>
         </div>
         <div class="field">
           <label>図面スタイル</label>
@@ -614,6 +786,27 @@
           </select>
         </div>
       </div>
+    </div>
+
+    <div>
+      <div class="section-title">作業床設定</div>
+      <div class="field-group">
+        <div class="field">
+          <label>1段目高さ（GLから）</label>
+          <input type="number" id="firstFloorH" value="1800" step="450" min="450">
+          <div class="unit">mm</div>
+        </div>
+        <div class="field">
+          <label>基本ピッチ</label>
+          <input type="number" id="floorPitch" value="1800" step="450" min="450">
+          <div class="unit">mm（2段目以降の間隔）</div>
+        </div>
+      </div>
+      <div id="irregularContainer" class="irregular-list">
+        <!-- 動的に生成 -->
+      </div>
+      <button class="btn-add-irregular" onclick="addIrregular()">＋ イレギュラー段を追加</button>
+      <div id="floorPreview" class="floor-preview"></div>
     </div>
 
     <div class="info-box" id="calcInfo">
@@ -657,8 +850,33 @@
       <div class="tab" onclick="switchTab('spec')">仕様・数量</div>
     </div>
 
+    <div class="markup-bar" id="markupBar">
+      <button class="markup-btn" id="mkBtnSelect" onclick="setMarkupTool('select')">選択</button>
+      <button class="markup-btn" id="mkBtnPen" onclick="setMarkupTool('pen')">ペン</button>
+      <button class="markup-btn" id="mkBtnLine" onclick="setMarkupTool('line')">直線</button>
+      <button class="markup-btn" id="mkBtnCircle" onclick="setMarkupTool('circle')">丸</button>
+      <button class="markup-btn" id="mkBtnRect" onclick="setMarkupTool('rect')">四角</button>
+      <button class="markup-btn" id="mkBtnArrow" onclick="setMarkupTool('arrow')">矢印</button>
+      <button class="markup-btn" id="mkBtnText" onclick="setMarkupTool('text')">文字</button>
+      <div class="markup-sep"></div>
+      <span class="markup-label">色</span>
+      <input type="color" id="mkColor" value="#ff0000">
+      <span class="markup-label">太さ</span>
+      <select id="mkWidth">
+        <option value="2">細</option>
+        <option value="3" selected>中</option>
+        <option value="5">太</option>
+        <option value="8">極太</option>
+      </select>
+      <div class="markup-sep"></div>
+      <button class="markup-btn" onclick="undoMarkup()">戻す</button>
+      <button class="markup-btn" onclick="clearMarkup()">全消去</button>
+    </div>
     <div class="drawing-wrap" id="drawWrap">
-      <canvas id="drawingCanvas" width="1200" height="800"></canvas>
+      <div class="canvas-container" id="canvasContainer">
+        <canvas id="drawingCanvas" width="1200" height="800"></canvas>
+        <canvas id="markupCanvas" width="1200" height="800"></canvas>
+      </div>
     </div>
     <div class="drawing-wrap" id="refWrap" style="display:none;">
       <div id="refPlaceholder" style="color:#888ba0; font-size:14px; text-align:center; padding:40px;">
@@ -855,8 +1073,8 @@ overlayOpacity.addEventListener('input', () => generate());
 // ============================================================
 //  足場スパン自動割付計算
 // ============================================================
-function calculateLayout(buildingLen, targetOffset, standardSpan) {
-  const targetTotal = buildingLen + targetOffset * 2;
+function calculateLayout(buildingLen, offsetLeft, offsetRight, standardSpan) {
+  const targetTotal = buildingLen + offsetLeft + offsetRight;
 
   // 有効スパンの合計は必ず300の倍数になる（600,900,1200,1500,1800）
   // targetTotalに最も近い300の倍数を探す（離れ最低200mm確保）
@@ -884,11 +1102,9 @@ function calculateLayout(buildingLen, targetOffset, standardSpan) {
     // 300は有効スパンでないので吸収
     const merged = standardSpan + 300;
     if (merged <= 1800) {
-      // 例: 1200+300=1500, 900+300=1200 → 有効スパン
       for (let i = 0; i < n - 1; i++) spans.push(standardSpan);
       spans.push(merged);
     } else {
-      // standardSpan=1800 → 2100=1500+600 に分割
       for (let i = 0; i < n - 1; i++) spans.push(standardSpan);
       spans.push(1500);
       spans.push(600);
@@ -900,24 +1116,144 @@ function calculateLayout(buildingLen, targetOffset, standardSpan) {
   }
 
   const actualTotal = spans.reduce((a, b) => a + b, 0);
+  // 左右のオフセット配分: 目標比率に応じて分配
   const totalOffset = actualTotal - buildingLen;
-  const offset = Math.round(totalOffset / 2);
+  const ratio = offsetLeft / (offsetLeft + offsetRight);
+  const actualLeft = Math.round(totalOffset * ratio);
+  const actualRight = totalOffset - actualLeft;
 
   // 支柱位置（建物左端=0 基準）
   const positions = [];
-  let x = -offset;
+  let x = -actualLeft;
   positions.push(x);
   for (const s of spans) {
     x += s;
     positions.push(Math.round(x));
   }
 
-  return { totalLength: actualTotal, spans, offset, positions };
+  return { totalLength: actualTotal, spans, offsetLeft: actualLeft, offsetRight: actualRight, positions };
 }
 
 let currentFace = 'south';
 let allFaces = ['south','north','east','west'];
 let allFaceIdx = 0;
+
+// ============================================================
+//  作業床設定（1段目高さ + 基本ピッチ + イレギュラー）
+// ============================================================
+// イレギュラー段: { level: 段番号(1始まり), height: その段の高さ(mm) }
+let irregularLevels = [];
+
+function addIrregular() {
+  // 現在の段数を計算して次の空き段を提案
+  const atop = (+document.getElementById('noki').value) + (+document.getElementById('topEx').value);
+  const jackBase = +document.getElementById('jackBase').value || 0;
+  const firstH = +document.getElementById('firstFloorH').value || 1800;
+  const pitch = +document.getElementById('floorPitch').value || 1800;
+  const totalLevels = Math.ceil((atop - jackBase - firstH) / pitch) + 1;
+  const usedLevels = irregularLevels.map(ir => ir.level);
+  let nextLevel = 2;
+  while (usedLevels.includes(nextLevel) && nextLevel <= totalLevels) nextLevel++;
+  irregularLevels.push({ level: nextLevel, height: 1350 });
+  renderIrregulars();
+  generate();
+}
+
+function removeIrregular(idx) {
+  irregularLevels.splice(idx, 1);
+  renderIrregulars();
+  generate();
+}
+
+function updateIrregular(idx, field, val) {
+  if (field === 'level') irregularLevels[idx].level = +val;
+  else irregularLevels[idx].height = Math.max(450, +val);
+  renderIrregulars();
+  generate();
+}
+
+function renderIrregulars() {
+  const container = document.getElementById('irregularContainer');
+  const atop = (+document.getElementById('noki').value) + (+document.getElementById('topEx').value);
+  const jackBase = +document.getElementById('jackBase').value || 0;
+  const firstH = +document.getElementById('firstFloorH').value || 1800;
+  const pitch = +document.getElementById('floorPitch').value || 1800;
+  const totalLevels = Math.ceil((atop - jackBase - firstH) / pitch) + 1;
+
+  let html = '';
+  irregularLevels.forEach((ir, i) => {
+    let options = '';
+    for (let n = 1; n <= Math.max(totalLevels, ir.level); n++) {
+      options += `<option value="${n}" ${n === ir.level ? 'selected' : ''}>${n}段目</option>`;
+    }
+    html += `<div class="irregular-row">
+      <select onchange="updateIrregular(${i},'level',this.value)">${options}</select>
+      <input type="number" value="${ir.height}" step="450" min="450"
+        onchange="updateIrregular(${i},'height',this.value)">
+      <span class="unit-sm">mm</span>
+      <button class="btn-del" onclick="removeIrregular(${i})">×</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+  updateFloorPreview();
+}
+
+// コブ位置にスナップ（ジャッキベースから450mmピッチのグリッド）
+function snapToKobu(pos, jackBase) {
+  const kobuPitch = 450;
+  const fromBase = pos - jackBase;
+  const kobuCount = Math.round(fromBase / kobuPitch);
+  return jackBase + kobuCount * kobuPitch;
+}
+
+function computeWorkFloors() {
+  const atop = (+document.getElementById('noki').value) + (+document.getElementById('topEx').value);
+  const jackBase = +document.getElementById('jackBase').value || 0;
+  const firstH = +document.getElementById('firstFloorH').value || 1800;
+  const pitch = +document.getElementById('floorPitch').value || 1800;
+
+  // イレギュラーをマップ化（段番号 → その段の間隔）
+  const irMap = {};
+  irregularLevels.forEach(ir => { irMap[ir.level] = ir.height; });
+
+  // 軒先高さ
+  const noki = +document.getElementById('noki').value || 7500;
+
+  // 全ての作業床位置をコブグリッドにスナップ
+  // 軒先を超えた作業床は生成しない
+  const floors = [];
+  const levelHeights = [];
+  let h = jackBase;
+  let level = 1;
+  while (true) {
+    const rawLh = (level === 1) ? firstH : (irMap[level] !== undefined ? irMap[level] : pitch);
+    const rawPos = h + rawLh;
+    const snappedPos = snapToKobu(rawPos, jackBase);
+    if (snappedPos >= noki) break; // 軒先以上は布板なし
+    if (snappedPos <= h) break;
+    const actualLh = snappedPos - h;
+    floors.push(snappedPos);
+    levelHeights.push(actualLh);
+    h = snappedPos;
+    level++;
+  }
+  return { floors, levelHeights, jackBase };
+}
+
+function updateFloorPreview() {
+  const { floors, levelHeights, jackBase } = computeWorkFloors();
+  const irMap = {};
+  irregularLevels.forEach(ir => { irMap[ir.level] = true; });
+
+  let html = `<span style="color:var(--accent2)">JB: GL+${jackBase}mm</span><br>`;
+  floors.forEach((fh, i) => {
+    const isIr = irMap[i + 1];
+    const mark = isIr ? '<span class="irregular-mark"> *</span>' : '';
+    html += `${i+1}FL: GL+${fh.toLocaleString()}mm（${levelHeights[i]}mm）${mark}<br>`;
+  });
+  if (floors.length === 0) html += '段数: 0';
+  document.getElementById('floorPreview').innerHTML = html;
+}
 
 function getParams() {
   return {
@@ -927,10 +1263,15 @@ function getParams() {
     h2f   : +document.getElementById('h2f').value,
     noki  : +document.getElementById('noki').value,
     mune  : +document.getElementById('mune').value,
-    ao    : +document.getElementById('ao').value,
+    aoN   : +document.getElementById('aoN').value,
+    aoS   : +document.getElementById('aoS').value,
+    aoE   : +document.getElementById('aoE').value,
+    aoW   : +document.getElementById('aoW').value,
     aw    : +document.getElementById('aw').value,
     span  : +document.getElementById('span').value,
+    jackBase : +document.getElementById('jackBase').value,
     topEx : +document.getElementById('topEx').value,
+    tesuriType : document.getElementById('tesuriType').value,
     style : document.getElementById('style').value,
     face  : document.getElementById('face').value,
     proj  : document.getElementById('projName').value,
@@ -943,19 +1284,33 @@ function generate() {
   const p = getParams();
   currentFace = p.face;
 
+  // 作業床計算（全面共通）
+  const wfResult = computeWorkFloors();
+  p.workFloors = wfResult.floors;
+  p.levelHeights = wfResult.levelHeights;
+  p.jackBase = wfResult.jackBase;
+
   // 自動割付計算（X方向=建物幅、Y方向=建物奥行）
-  p.layoutX = calculateLayout(p.bldW, p.ao, p.span);
-  p.layoutY = calculateLayout(p.bldD, p.ao, p.span);
+  p.layoutXSouth = calculateLayout(p.bldW, p.aoW, p.aoE, p.span);
+  p.layoutXNorth = calculateLayout(p.bldW, p.aoE, p.aoW, p.span);
+  p.layoutYEast  = calculateLayout(p.bldD, p.aoS, p.aoN, p.span);
+  p.layoutYWest  = calculateLayout(p.bldD, p.aoN, p.aoS, p.span);
 
   if (p.face === 'plan') {
-    // 平面図は両方向の割付を使う
-    p.aoX = p.layoutX.offset;
-    p.aoY = p.layoutY.offset;
+    p.layoutX = p.layoutXSouth;
+    p.layoutY = p.layoutYEast;
+    p.aoXL = p.layoutX.offsetLeft;
+    p.aoXR = p.layoutX.offsetRight;
+    p.aoYL = p.layoutY.offsetLeft;
+    p.aoYR = p.layoutY.offsetRight;
   } else {
-    // 立面図は表示面に応じた割付を使う
-    const isNS = (p.face === 'south' || p.face === 'north');
-    const layout = isNS ? p.layoutX : p.layoutY;
-    p.ao = layout.offset;       // 実際の離れに上書き
+    let layout;
+    if (p.face === 'south') layout = p.layoutXSouth;
+    else if (p.face === 'north') layout = p.layoutXNorth;
+    else if (p.face === 'east') layout = p.layoutYEast;
+    else layout = p.layoutYWest;
+    p.aoL = layout.offsetLeft;
+    p.aoR = layout.offsetRight;
     p.pillarXs = layout.positions;
     p.spanLayout = layout.spans;
   }
@@ -966,16 +1321,21 @@ function generate() {
   } else {
     drawElevation(p, p.face);
   }
+
+  // プレビュー更新
+  updateFloorPreview();
 }
 
 function updateInfo(p) {
   const atop = p.noki + p.topEx;
-  const isNS = (p.face==='south'||p.face==='north');
-  const layout = isNS ? p.layoutX : (p.face==='plan' ? p.layoutX : p.layoutY);
-  const layoutY = p.layoutY;
-  const floorCount = Math.ceil(atop / p.span);
-  const pillarCount = layout.positions.length;
-  const totalPillar = pillarCount * 2 + 4;
+  let layout;
+  if (p.face === 'south') layout = p.layoutXSouth;
+  else if (p.face === 'north') layout = p.layoutXNorth;
+  else if (p.face === 'east') layout = p.layoutYEast;
+  else if (p.face === 'west') layout = p.layoutYWest;
+  else layout = p.layoutXSouth; // plan default
+
+  const floorCount = p.workFloors ? p.workFloors.length : 0;
 
   // スパン割付表示（例: "1800×4 + 1200"）
   const spanCounts = {};
@@ -985,24 +1345,24 @@ function updateInfo(p) {
     .map(([s,c]) => c > 1 ? `${Number(s).toLocaleString()}×${c}` : `${Number(s).toLocaleString()}`)
     .join(' + ');
 
-  const actualAo = p.face === 'plan' ? p.aoX : p.ao;
-  const targetAo = +document.getElementById('ao').value;
+  const aoLStr = p.face === 'plan' ? p.aoXL : p.aoL;
+  const aoRStr = p.face === 'plan' ? p.aoXR : p.aoR;
 
   document.getElementById('calcInfo').innerHTML = `
     足場天端: <span>${atop.toLocaleString()} mm</span><br>
-    段数: <span>${floorCount} 段</span>（層高 ${p.span}mm）<br>
+    作業床数: <span>${floorCount} 段</span><br>
     スパン割付: <span>${spanDesc}</span><br>
-    建物離れ: <span>${actualAo} mm</span>（目標 ${targetAo}mm）<br>
+    壁離れ（左/右）: <span>${aoLStr} / ${aoRStr} mm</span><br>
     足場幅: <span>${p.aw} mm</span> / 総幅: <span>${layout.totalLength.toLocaleString()} mm</span>
   `;
   document.getElementById('statusBar').innerHTML =
-    `<span class="ok">✓ 生成完了</span><span>${p.face==='plan'?'平面図':'立面図'} — ${p.proj} ${p.site}</span><span>離れ: ${actualAo}mm（自動）</span><span>割付: ${spanDesc}</span><span>S=1:100</span>`;
+    `<span class="ok">✓ 生成完了</span><span>${p.face==='plan'?'平面図':'立面図'} — ${p.proj} ${p.site}</span><span>離れ: ${aoLStr}/${aoRStr}mm（自動）</span><span>割付: ${spanDesc}</span><span>S=1:100</span>`;
 
   // モバイル用情報バー更新
   const mi = document.getElementById('mobileInfo');
   if (mi) {
     const faceName = {south:'南立面',north:'北立面',east:'東立面',west:'西立面',plan:'平面図'}[p.face];
-    mi.innerHTML = `<span>${faceName}</span> ${p.site||''} ｜ 割付: <span>${spanDesc}</span> ｜ 離れ: <span>${actualAo}mm</span>`;
+    mi.innerHTML = `<span>${faceName}</span> ${p.site||''} ｜ 割付: <span>${spanDesc}</span> ｜ 離れ: <span>${aoLStr}/${aoRStr}mm</span>`;
   }
 }
 
@@ -1015,6 +1375,8 @@ function drawElevation(p, face) {
   const atop  = p.noki + p.topEx;
   const gl    = 500;
   const isColor = p.style === 'color';
+  const aoL = p.aoL;
+  const aoR = p.aoR;
 
   // キャンバスサイズ決定
   const CW = 1200, CH = 820;
@@ -1024,12 +1386,12 @@ function drawElevation(p, face) {
   const drawH = CH - MARGIN_T - MARGIN_B;
 
   // スケール: 足場込みの幅と高さに合わせる
-  const totalW = bw + (p.ao + p.aw) * 2 + 800;
+  const totalW = bw + aoL + aoR + p.aw * 2 + 800;
   const totalH = atop + gl + 800;
   const sc = Math.min(drawW / totalW, drawH / totalH);
 
   function mm(v) { return v * sc; }
-  const OX = MARGIN_L + mm(p.ao + p.aw + 400); // 原点X（建物左端）
+  const OX = MARGIN_L + mm(aoL + p.aw + 400); // 原点X（建物左端）
   const OY = CH - MARGIN_B - mm(gl);            // 原点Y（GL）
 
   function px(v) { return OX + mm(v); }
@@ -1052,15 +1414,15 @@ function drawElevation(p, face) {
   ctx.strokeStyle = '#111';
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(px(-p.ao-p.aw-500), py(0));
-  ctx.lineTo(px(bw+p.ao+p.aw+500), py(0));
+  ctx.moveTo(px(-aoL-p.aw-500), py(0));
+  ctx.lineTo(px(bw+aoR+p.aw+500), py(0));
   ctx.stroke();
 
   // GL ハッチ
   ctx.strokeStyle = '#bbb';
   ctx.lineWidth = 0.8;
   for(let i=0;i<70;i++){
-    const xi = px(-p.ao-p.aw-450) + i*30;
+    const xi = px(-aoL-p.aw-450) + i*30;
     ctx.beginPath(); ctx.moveTo(xi,py(0)); ctx.lineTo(xi-10,py(0)+10); ctx.stroke();
   }
 
@@ -1074,10 +1436,10 @@ function drawElevation(p, face) {
   // 足場エリア背景
   if(isColor) {
     ctx.fillStyle = 'rgba(240,248,255,0.8)';
-    ctx.fillRect(px(-p.ao), py(atop+200), mm(bw+p.ao*2), mm(atop+200));
+    ctx.fillRect(px(-aoL), py(atop+200), mm(bw+aoL+aoR), mm(atop+200));
     ctx.fillStyle = 'rgba(220,235,255,0.8)';
-    ctx.fillRect(px(-p.ao-p.aw), py(atop+200), mm(p.aw), mm(atop+200));
-    ctx.fillRect(px(bw+p.ao), py(atop+200), mm(p.aw), mm(atop+200));
+    ctx.fillRect(px(-aoL-p.aw), py(atop+200), mm(p.aw), mm(atop+200));
+    ctx.fillRect(px(bw+aoR), py(atop+200), mm(p.aw), mm(atop+200));
   }
 
   // 外壁
@@ -1104,12 +1466,12 @@ function drawElevation(p, face) {
   ctx.lineWidth = 0.8;
   ctx.setLineDash([5,3]);
   ctx.beginPath();
-  ctx.moveTo(px(-p.ao), py(gl+p.h1f)); ctx.lineTo(px(bw+p.ao), py(gl+p.h1f));
+  ctx.moveTo(px(-aoL), py(gl+p.h1f)); ctx.lineTo(px(bw+aoR), py(gl+p.h1f));
   ctx.stroke(); ctx.setLineDash([]);
   ctx.fillStyle = '#888';
   ctx.font = '10px Noto Sans JP';
   ctx.textAlign = 'right';
-  ctx.fillText('2F.L.', px(-p.ao)-4, py(gl+p.h1f)+4);
+  ctx.fillText('2F.L.', px(-aoL)-4, py(gl+p.h1f)+4);
 
   // 屋根
   drawRoof(ctx, px, py, bw, p.noki, p.mune, isColor);
@@ -1119,22 +1481,76 @@ function drawElevation(p, face) {
 
   // ===== 支柱位置計算（自動割付） =====
   const pillarXs = p.pillarXs || (() => {
-    const xs = []; let xp = -p.ao;
-    while(xp <= bw+p.ao+1) { xs.push(Math.round(xp)); xp += p.span; }
-    if(xs[xs.length-1] < bw+p.ao) xs.push(bw+p.ao);
+    const xs = []; let xp = -aoL;
+    while(xp <= bw+aoR+1) { xs.push(Math.round(xp)); xp += p.span; }
+    if(xs[xs.length-1] < bw+aoR) xs.push(bw+aoR);
     return xs;
   })();
   const outerXs = [pillarXs[0]-p.aw, pillarXs[pillarXs.length-1]+p.aw];
   const allXs = [...new Set([...pillarXs,...outerXs])].sort((a,b)=>a-b);
 
-  // ===== 各段 描画 =====
-  let h = 0;
-  while(h <= atop+50) {
-    // 布板
-    drawFuriban(ctx, px, py, mm, p, bw, h, atop, isColor);
-    // 手すり
-    if(h > 0) drawTesuri(ctx, px, py, mm, p, bw, h, isColor);
-    h += p.span;
+  // ===== 作業床・手すり・中桟・バッテン描画 =====
+  const jb = p.jackBase || 0;
+  const tType = p.tesuriType || 'senkou2';
+  const isSenkou = tType === 'senkou2';
+  const hasTesuri = tType !== 'none';
+  const hasNakazan = tType === 'tesuri2';
+  // 先行手摺 = バッテン（×）、手摺2本 = 手すり+中桟、手摺1本 = 手すりのみ
+
+  if (p.workFloors && p.workFloors.length > 0) {
+    p.workFloors.forEach((wfh, idx) => {
+      // 布板（作業床）at kobu position
+      drawFuriban(ctx, px, py, mm, p, bw, wfh, atop, isColor, aoL, aoR);
+
+      const nextFloor = idx < p.workFloors.length - 1 ? p.workFloors[idx + 1] : null;
+      const prevFloor = idx > 0 ? p.workFloors[idx - 1] : 0;
+
+      if (isSenkou) {
+        // 先行手摺: 作業床から+900mmにバッテン（×）
+        drawSenkouBatten(ctx, px, py, mm, p, bw, wfh, isColor, aoL, aoR, pillarXs, jb);
+      } else {
+        // 中桟: 作業床 +1コブ（450mm）
+        if (hasNakazan) {
+          const nakazanH = snapToKobu(wfh + 450, jb);
+          const limit = nextFloor || atop + 200;
+          if (nakazanH < limit && nakazanH <= atop + 200) {
+            drawNakazan(ctx, px, py, mm, p, bw, nakazanH, isColor, aoL, aoR);
+          }
+        }
+
+        // 手すり: 作業床 +2コブ（900mm）
+        if (hasTesuri) {
+          const tesuriH = snapToKobu(wfh + 900, jb);
+          const limit = nextFloor || atop + 200;
+          if (tesuriH <= limit && tesuriH <= atop + 200) {
+            drawTesuri(ctx, px, py, mm, p, bw, tesuriH, isColor, aoL, aoR);
+          }
+        }
+      }
+    });
+
+    // ===== 軒先上の手すり（屋根落下防止） =====
+    const topFloor = p.workFloors[p.workFloors.length - 1];
+    if (isSenkou) {
+      // 先行手摺: 軒先から+900mmにバッテン＋手すり
+      drawSenkouBatten(ctx, px, py, mm, p, bw, p.noki, isColor, aoL, aoR, pillarXs, jb);
+    } else if (tType === 'tesuri2') {
+      // 手摺2本: 軒先+450mm（1コブ）と+900mm（2コブ）に手すり2本
+      const nokiN = snapToKobu(p.noki + 450, jb);
+      if (nokiN <= atop + 200) {
+        drawNakazan(ctx, px, py, mm, p, bw, nokiN, isColor, aoL, aoR);
+      }
+      const nokiT = snapToKobu(p.noki + 900, jb);
+      if (nokiT <= atop + 200) {
+        drawTesuri(ctx, px, py, mm, p, bw, nokiT, isColor, aoL, aoR);
+      }
+    } else if (tType === 'tesuri1') {
+      // 手摺1本: 軒先+900mm（2コブ上り）に手すり1本のみ
+      const nokiT = snapToKobu(p.noki + 900, jb);
+      if (nokiT <= atop + 200) {
+        drawTesuri(ctx, px, py, mm, p, bw, nokiT, isColor, aoL, aoR);
+      }
+    }
   }
 
   // ===== 支柱（縦線） =====
@@ -1147,75 +1563,132 @@ function drawElevation(p, face) {
     ctx.stroke();
   });
 
-  // ===== 筋交い =====
-  drawBrace(ctx, px, py, mm, pillarXs, outerXs, p, bw, atop, isColor);
-
-  // ===== くさびジョイント =====
+  // ===== くさびジョイント（ジャッキベースから450mmピッチ） =====
   allXs.forEach(spx => {
-    let h=0;
-    while(h<=atop+50){
+    let h = jb;
+    while(h<=atop+200){
       ctx.beginPath();
-      ctx.arc(px(spx), py(h), isColor ? 4 : 4, 0, Math.PI*2);
+      ctx.arc(px(spx), py(h), 4, 0, Math.PI*2);
       ctx.fillStyle = isColor ? '#cc3300' : '#111';
       ctx.fill();
-      h += p.span;
+      h += 450;
     }
   });
 
-  // ===== 壁つなぎ =====
-  const wtHeights = [gl+p.h1f*0.5, gl+p.h1f, gl+p.h1f+p.h2f*0.5, gl+p.h1f+p.h2f];
-  wtHeights.forEach(wh => {
-    if(wh > atop) return;
-    [[0,-1],[bw,1]].forEach(([wx,sign]) => {
-      ctx.strokeStyle = '#111';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(px(wx), py(wh)); ctx.lineTo(px(wx+sign*p.ao), py(wh));
-      ctx.stroke();
-      // 壁つなぎ大●
-      ctx.beginPath();
-      ctx.arc(px(wx), py(wh), 10, 0, Math.PI*2);
-      ctx.fillStyle = 'black';
-      ctx.fill();
-    });
-  });
+  // ===== 壁つなぎ（千鳥配置） =====
+  // 垂直: 地上から3600mm以内に1段目、そこから3600mmピッチ
+  // 水平: 足場角から3600mm以内、そこから3600mmピッチ
+  // 千鳥: 奇数列=セットA（角から）、偶数列=セットB（1800mmずらし）
+  if (p.workFloors && p.workFloors.length > 0 && pillarXs && pillarXs.length > 0) {
+    const scaffoldLeft = pillarXs[0];
+    const scaffoldRight = pillarXs[pillarXs.length - 1];
+
+    // セットA: 足場左端から3600mmピッチ
+    const wtXSetA = [];
+    let lastA = scaffoldLeft;
+    wtXSetA.push(scaffoldLeft);
+    for (let i = 1; i < pillarXs.length; i++) {
+      if (pillarXs[i] >= lastA + 3600 - 1) {
+        wtXSetA.push(pillarXs[i]);
+        lastA = pillarXs[i];
+      }
+    }
+    if (wtXSetA[wtXSetA.length - 1] < scaffoldRight) wtXSetA.push(scaffoldRight);
+
+    // セットB: 左端+1800mmから3600mmピッチ（千鳥）
+    const wtXSetB = [];
+    let lastB = scaffoldLeft;
+    for (let i = 1; i < pillarXs.length; i++) {
+      if (pillarXs[i] >= scaffoldLeft + 1800 - 1) {
+        wtXSetB.push(pillarXs[i]);
+        lastB = pillarXs[i];
+        break;
+      }
+    }
+    for (let i = 0; i < pillarXs.length; i++) {
+      if (pillarXs[i] > lastB && pillarXs[i] >= lastB + 3600 - 1) {
+        wtXSetB.push(pillarXs[i]);
+        lastB = pillarXs[i];
+      }
+    }
+
+    // 壁つなぎを配置する作業床: 2FL(index=1)のみ → セットB
+    // 2FL位置の支柱にのみ壁つなぎを設置
+    if (p.workFloors.length >= 2) {
+      const wtHeight = p.workFloors[1]; // 2FL
+      wtXSetB.forEach(wtx => {
+        const wallX = Math.max(0, Math.min(bw, wtx));
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(px(wtx), py(wtHeight));
+        ctx.lineTo(px(wallX), py(wtHeight));
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(px(wtx), py(wtHeight), 8, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+      });
+    }
+  }
 
   // ===== ジャッキベース =====
   allXs.forEach(spx => {
     ctx.fillStyle = '#444';
     ctx.strokeStyle = '#111';
     ctx.lineWidth = 1;
-    ctx.fillRect(px(spx)-7, py(0), 14, 12);
-    ctx.strokeRect(px(spx)-7, py(0), 14, 12);
+    // ジャッキベース台座
+    ctx.fillRect(px(spx)-10, py(0), 20, 12);
+    ctx.strokeRect(px(spx)-10, py(0), 20, 12);
+    // ジャッキベース支柱（GLからjackBase高さまで）
+    if (jb > 0) {
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px(spx), py(0));
+      ctx.lineTo(px(spx), py(jb));
+      ctx.stroke();
+      // ジャッキベース上端マーク
+      ctx.fillStyle = '#666';
+      ctx.fillRect(px(spx)-5, py(jb)-2, 10, 4);
+    }
   });
 
   // ===== 防護ネット =====
   ctx.strokeStyle = isColor ? '#888' : '#aaa';
   ctx.lineWidth = 0.7;
   ctx.setLineDash([2,2]);
-  ctx.strokeRect(px(-p.ao-p.aw), py(atop+200), mm(p.aw), mm(atop+200));
-  ctx.strokeRect(px(bw+p.ao), py(atop+200), mm(p.aw), mm(atop+200));
+  ctx.strokeRect(px(-aoL-p.aw), py(atop+200), mm(p.aw), mm(atop+200));
+  ctx.strokeRect(px(bw+aoR), py(atop+200), mm(p.aw), mm(atop+200));
   ctx.setLineDash([]);
 
   // ===== 寸法線 =====
-  drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B);
+  drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B, aoL, aoR);
 
   // 高さラベル（左）
-  drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor);
+  drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor, aoL);
 
   // ===== FL番号（左側） =====
-  let flH = gl, flN = 1;
-  ctx.font = 'bold 10px Share Tech Mono';
-  ctx.fillStyle = '#555';
-  ctx.textAlign = 'right';
-  while(flH <= atop+p.span) {
-    ctx.fillText(`${flN}FL`, px(-p.ao-p.aw)-58, py(flH)+4);
-    flH += p.span; flN++;
+  if (p.workFloors && p.workFloors.length > 0) {
+    const irMap = {};
+    irregularLevels.forEach(ir => { irMap[ir.level] = true; });
+    ctx.textAlign = 'right';
+    p.workFloors.forEach((wfh, idx) => {
+      const isIr = irMap[idx + 1];
+      ctx.fillStyle = isIr ? '#e8a020' : '#555';
+      ctx.font = 'bold 10px Share Tech Mono';
+      ctx.fillText(`${idx+1}FL`, px(-aoL-p.aw)-58, py(wfh)+4);
+      // 段高さも表示
+      ctx.fillStyle = '#888';
+      ctx.font = '8px Share Tech Mono';
+      const lh = p.levelHeights ? p.levelHeights[idx] : 1800;
+      ctx.fillText(`(${lh})`, px(-aoL-p.aw)-58, py(wfh)+14);
+    });
   }
 
   // ===== 引出線ラベル（カラー版） =====
   if(isColor) {
-    drawCallouts(ctx, px, py, p, bw, atop);
+    drawCallouts(ctx, px, py, p, bw, atop, aoL, aoR);
   }
 
   // ===== 凡例 =====
@@ -1284,75 +1757,138 @@ function drawWindows(ctx, px, py, mm, bw, h1f, gl, isNS, isColor) {
   });
 }
 
-function drawFuriban(ctx, px, py, mm, p, bw, h, atop, isColor) {
+function drawFuriban(ctx, px, py, mm, p, bw, h, atop, isColor, aoL, aoR) {
+  const aL = aoL !== undefined ? aoL : p.aoL;
+  const aR = aoR !== undefined ? aoR : p.aoR;
   // 建物前面布板
   if(isColor) {
     ctx.fillStyle = '#ff8c00';
     ctx.strokeStyle = '#cc5500';
     ctx.lineWidth = 0.8;
-    ctx.fillRect(px(-p.ao), py(h)-4, mm(bw+p.ao*2), 8);
-    ctx.strokeRect(px(-p.ao), py(h)-4, mm(bw+p.ao*2), 8);
+    ctx.fillRect(px(-aL), py(h)-4, mm(bw+aL+aR), 8);
+    ctx.strokeRect(px(-aL), py(h)-4, mm(bw+aL+aR), 8);
     // 左右外側
-    ctx.fillRect(px(-p.ao-p.aw), py(h)-4, mm(p.aw), 8);
-    ctx.strokeRect(px(-p.ao-p.aw), py(h)-4, mm(p.aw), 8);
-    ctx.fillRect(px(bw+p.ao), py(h)-4, mm(p.aw), 8);
-    ctx.strokeRect(px(bw+p.ao), py(h)-4, mm(p.aw), 8);
+    ctx.fillRect(px(-aL-p.aw), py(h)-4, mm(p.aw), 8);
+    ctx.strokeRect(px(-aL-p.aw), py(h)-4, mm(p.aw), 8);
+    ctx.fillRect(px(bw+aR), py(h)-4, mm(p.aw), 8);
+    ctx.strokeRect(px(bw+aR), py(h)-4, mm(p.aw), 8);
   } else {
     ctx.fillStyle = '#333';
     ctx.strokeStyle = '#111';
     ctx.lineWidth = 0.5;
-    [[px(-p.ao-p.aw), mm(bw+p.ao*2+p.aw*2)]].forEach(([sx,sw]) => {
+    [[px(-aL-p.aw), mm(bw+aL+aR+p.aw*2)]].forEach(([sx,sw]) => {
       ctx.fillRect(sx, py(h)-4, sw, 8);
     });
   }
 }
 
-function drawTesuri(ctx, px, py, mm, p, bw, h, isColor) {
-  // 外手すり（上段）
-  const hr1 = h - p.span * 0.12;
-  // 中間手すり
-  const hr2 = h - p.span * 0.45;
-  [hr1, hr2].forEach((hr, idx) => {
-    ctx.strokeStyle = isColor ? (idx===0 ? '#1144cc' : '#5577ee') : '#333';
-    ctx.lineWidth = isColor ? (idx===0 ? 2.5 : 1.5) : 1.2;
-    ctx.beginPath();
-    ctx.moveTo(px(-p.ao-p.aw), py(hr));
-    ctx.lineTo(px(bw+p.ao+p.aw), py(hr));
-    ctx.stroke();
-  });
+function drawTesuri(ctx, px, py, mm, p, bw, h, isColor, aoL, aoR) {
+  const aL = aoL !== undefined ? aoL : p.aoL;
+  const aR = aoR !== undefined ? aoR : p.aoR;
+  // 手すり（単一ライン at specified height）
+  ctx.strokeStyle = isColor ? '#1144cc' : '#333';
+  ctx.lineWidth = isColor ? 2.5 : 1.5;
+  ctx.beginPath();
+  ctx.moveTo(px(-aL-p.aw), py(h));
+  ctx.lineTo(px(bw+aR+p.aw), py(h));
+  ctx.stroke();
 }
 
-function drawBrace(ctx, px, py, mm, pillarXs, outerXs, p, bw, atop, isColor) {
+// 先行手摺バッテン（×）描画 — 作業床から+900mmの範囲にバッテン
+function drawSenkouBatten(ctx, px, py, mm, p, bw, floorH, isColor, aoL, aoR, pillarXs, jb) {
+  const aL = aoL !== undefined ? aoL : p.aoL;
+  const aR = aoR !== undefined ? aoR : p.aoR;
+  const topH = snapToKobu(floorH + 900, jb); // 作業床+900mm（2コブ上り）
+
+  ctx.strokeStyle = isColor ? '#1144cc' : '#333';
+  ctx.lineWidth = isColor ? 2 : 1.5;
+
+  if (pillarXs && pillarXs.length > 1) {
+    // 内側支柱間にバッテン（×）
+    for (let i = 0; i < pillarXs.length - 1; i++) {
+      const x1 = pillarXs[i], x2 = pillarXs[i + 1];
+      ctx.beginPath(); ctx.moveTo(px(x1), py(floorH)); ctx.lineTo(px(x2), py(topH)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(x2), py(floorH)); ctx.lineTo(px(x1), py(topH)); ctx.stroke();
+    }
+  }
+  // 外側（足場幅部分）にもバッテン
+  const leftIn = pillarXs ? pillarXs[0] : -aL;
+  const rightIn = pillarXs ? pillarXs[pillarXs.length - 1] : bw + aR;
+  ctx.beginPath(); ctx.moveTo(px(leftIn - p.aw), py(floorH)); ctx.lineTo(px(leftIn), py(topH)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px(leftIn), py(floorH)); ctx.lineTo(px(leftIn - p.aw), py(topH)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px(rightIn), py(floorH)); ctx.lineTo(px(rightIn + p.aw), py(topH)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px(rightIn + p.aw), py(floorH)); ctx.lineTo(px(rightIn), py(topH)); ctx.stroke();
+
+  // バッテン上端に手すり水平線
+  drawTesuri(ctx, px, py, mm, p, bw, topH, isColor, aoL, aoR);
+}
+
+function drawNakazan(ctx, px, py, mm, p, bw, h, isColor, aoL, aoR) {
+  const aL = aoL !== undefined ? aoL : p.aoL;
+  const aR = aoR !== undefined ? aoR : p.aoR;
+  // 中桟（青で統一、手すりより細め）
+  ctx.strokeStyle = isColor ? '#1144cc' : '#333';
+  ctx.lineWidth = isColor ? 1.5 : 0.8;
+  ctx.beginPath();
+  ctx.moveTo(px(-aL-p.aw), py(h));
+  ctx.lineTo(px(bw+aR+p.aw), py(h));
+  ctx.stroke();
+}
+
+function drawBrace(ctx, px, py, mm, pillarXs, outerXs, p, bw, atop, isColor, aoL, aoR) {
+  const aL = aoL !== undefined ? aoL : p.aoL;
+  const aR = aoR !== undefined ? aoR : p.aoR;
   ctx.strokeStyle = isColor ? '#555' : '#444';
   ctx.lineWidth = 1;
 
-  // 建物前面 筋交い（×）
-  for(let i=0;i<pillarXs.length-1;i++){
-    const x1=pillarXs[i], x2=pillarXs[i+1];
-    let h=0;
-    while(h+p.span<=atop+50){
-      // ×
-      ctx.beginPath(); ctx.moveTo(px(x1),py(h)); ctx.lineTo(px(x2),py(h+p.span)); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(px(x2),py(h)); ctx.lineTo(px(x1),py(h+p.span)); ctx.stroke();
-      h += p.span*2; // 1スパンおき
+  // 建物前面 筋交い（×） - use work floor intervals
+  const wf = p.workFloors && p.workFloors.length > 0 ? [0, ...p.workFloors] : null;
+  if (wf) {
+    for(let i=0;i<pillarXs.length-1;i++){
+      const x1=pillarXs[i], x2=pillarXs[i+1];
+      for(let j=0;j<wf.length-1;j+=2){
+        ctx.beginPath(); ctx.moveTo(px(x1),py(wf[j])); ctx.lineTo(px(x2),py(wf[j+1])); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(px(x2),py(wf[j])); ctx.lineTo(px(x1),py(wf[j+1])); ctx.stroke();
+      }
+    }
+  } else {
+    for(let i=0;i<pillarXs.length-1;i++){
+      const x1=pillarXs[i], x2=pillarXs[i+1];
+      let h=0;
+      while(h+p.span<=atop+50){
+        ctx.beginPath(); ctx.moveTo(px(x1),py(h)); ctx.lineTo(px(x2),py(h+p.span)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(px(x2),py(h)); ctx.lineTo(px(x1),py(h+p.span)); ctx.stroke();
+        h += p.span*2;
+      }
     }
   }
 
   // 左右外側 筋交い（×）
   ctx.lineWidth = 1.2;
-  let h=0;
-  while(h+p.span<=atop+50){
-    // 左
-    ctx.beginPath(); ctx.moveTo(px(-p.ao-p.aw),py(h)); ctx.lineTo(px(-p.ao),py(h+p.span)); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(px(-p.ao),py(h)); ctx.lineTo(px(-p.ao-p.aw),py(h+p.span)); ctx.stroke();
-    // 右
-    ctx.beginPath(); ctx.moveTo(px(bw+p.ao),py(h)); ctx.lineTo(px(bw+p.ao+p.aw),py(h+p.span)); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(px(bw+p.ao+p.aw),py(h)); ctx.lineTo(px(bw+p.ao),py(h+p.span)); ctx.stroke();
-    h += p.span;
+  if (wf) {
+    for(let j=0;j<wf.length-1;j++){
+      // 左
+      ctx.beginPath(); ctx.moveTo(px(-aL-p.aw),py(wf[j])); ctx.lineTo(px(-aL),py(wf[j+1])); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(-aL),py(wf[j])); ctx.lineTo(px(-aL-p.aw),py(wf[j+1])); ctx.stroke();
+      // 右
+      ctx.beginPath(); ctx.moveTo(px(bw+aR),py(wf[j])); ctx.lineTo(px(bw+aR+p.aw),py(wf[j+1])); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(bw+aR+p.aw),py(wf[j])); ctx.lineTo(px(bw+aR),py(wf[j+1])); ctx.stroke();
+    }
+  } else {
+    let h=0;
+    while(h+p.span<=atop+50){
+      ctx.beginPath(); ctx.moveTo(px(-aL-p.aw),py(h)); ctx.lineTo(px(-aL),py(h+p.span)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(-aL),py(h)); ctx.lineTo(px(-aL-p.aw),py(h+p.span)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(bw+aR),py(h)); ctx.lineTo(px(bw+aR+p.aw),py(h+p.span)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px(bw+aR+p.aw),py(h)); ctx.lineTo(px(bw+aR),py(h+p.span)); ctx.stroke();
+      h += p.span;
+    }
   }
 }
 
-function drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B) {
+function drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B, aoL, aoR) {
+  const aL = aoL !== undefined ? aoL : p.aoL;
+  const aR = aoR !== undefined ? aoR : p.aoR;
   ctx.strokeStyle = '#333';
   ctx.fillStyle = '#333';
   ctx.lineWidth = 1;
@@ -1367,20 +1903,27 @@ function drawDimensions(ctx, px, py, mm, p, bw, atop, gl, CW, CH, MARGIN_B) {
     }
   }
   // 外側（足場幅）
-  const leftInner = p.pillarXs ? p.pillarXs[0] : -p.ao;
-  const rightInner = p.pillarXs ? p.pillarXs[p.pillarXs.length-1] : bw+p.ao;
+  const leftInner = p.pillarXs ? p.pillarXs[0] : -aL;
+  const rightInner = p.pillarXs ? p.pillarXs[p.pillarXs.length-1] : bw+aR;
   drawDimH(ctx, px(leftInner-p.aw), px(leftInner), yBot, `${p.aw}`);
   drawDimH(ctx, px(rightInner), px(rightInner+p.aw), yBot, `${p.aw}`);
   // 全幅
   drawDimH(ctx, px(0), px(bw), yBot+22, `${bw.toLocaleString()}`);
 
-  // 垂直寸法（右）
-  let xR = px(bw+p.ao+p.aw) + 25;
-  let h=0;
-  while(h+p.span<=atop+50){
-    const nh=Math.min(h+p.span,atop);
-    drawDimV(ctx, xR, py(h), py(nh), `${(nh-h).toLocaleString()}`);
-    xR += 20; h = nh;
+  // 垂直寸法（右）— 各段の高さを表示
+  let xR = px(bw+aR+p.aw) + 25;
+  if (p.workFloors && p.workFloors.length > 0) {
+    // GL → ジャッキベース → 各作業床
+    const jbH = p.jackBase || 0;
+    const heights = jbH > 0 ? [0, jbH, ...p.workFloors] : [0, ...p.workFloors];
+    for (let i = 0; i < heights.length - 1; i++) {
+      const diff = heights[i+1] - heights[i];
+      drawDimV(ctx, xR, py(heights[i]), py(heights[i+1]), `${diff.toLocaleString()}`);
+    }
+    // 全高寸法
+    xR += 24;
+    const topFloor = p.workFloors[p.workFloors.length - 1];
+    drawDimV(ctx, xR, py(0), py(topFloor), `${topFloor.toLocaleString()}`);
   }
 }
 
@@ -1404,13 +1947,17 @@ function drawDimV(ctx, x, y1, y2, label) {
   ctx.restore();
 }
 
-function drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor) {
+function drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor, aoL) {
+  const jb = p.jackBase || 0;
   const labels = [
     [p.noki,   '▼軒先 ' + p.noki.toLocaleString(), '#333'],
     [p.mune,   '▼棟 ' + p.mune.toLocaleString(), '#555'],
     [atop,     '▼足場天端 ' + atop.toLocaleString(), isColor?'#0044bb':'#333'],
     [gl+p.h1f, '▼2F.L.', '#888'],
   ];
+  if (jb > 0) {
+    labels.push([jb, '▼JB ' + jb.toLocaleString(), isColor?'#cc6600':'#666']);
+  }
   labels.forEach(([yval,label,col]) => {
     ctx.strokeStyle = col;
     ctx.lineWidth = 0.8;
@@ -1431,12 +1978,13 @@ function drawHeightLabels(ctx, px, py, p, bw, atop, gl, isColor) {
   ctx.fillText('▼G.L.±0', px(0)+4, py(0)+14);
 }
 
-function drawCallouts(ctx, px, py, p, bw, atop) {
+function drawCallouts(ctx, px, py, p, bw, atop, aoL, aoR) {
+  const aR = aoR !== undefined ? aoR : p.aoR;
   const items = [
-    [bw+p.ao+p.aw-100, atop+150, bw+p.ao+p.aw+120, atop+80, '壁つなぎ用手摺'],
-    [bw+p.ao,           atop-p.span*0.12, bw+p.ao+p.aw+150, atop-p.span*0.12+50, '外手摺'],
-    [bw+p.ao,           atop-p.span*0.45, bw+p.ao+p.aw+150, atop-p.span*0.45+50, '中間手摺'],
-    [bw+p.ao+p.aw,      atop-p.span,     bw+p.ao+p.aw+160, atop-p.span+60, 'クサビ支柱'],
+    [bw+aR+p.aw-100, atop+150, bw+aR+p.aw+120, atop+80, '壁つなぎ用手摺'],
+    [bw+aR,           atop-900, bw+aR+p.aw+150, atop-900+50, '手摺'],
+    [bw+aR,           atop-450, bw+aR+p.aw+150, atop-450+50, '中桟'],
+    [bw+aR+p.aw,      atop-p.span,     bw+aR+p.aw+160, atop-p.span+60, 'クサビ支柱'],
   ];
   ctx.font = '11px Noto Sans JP';
   items.forEach(([x1,y1,x2,y2,lbl]) => {
@@ -1467,35 +2015,29 @@ function drawLegend(ctx, CW, CH, isColor) {
   if(isColor) {
     // 布板
     ctx.fillStyle = '#ff8c00'; ctx.fillRect(lx, ly, 28, 7); ctx.strokeStyle='#cc5500'; ctx.lineWidth=0.8; ctx.strokeRect(lx,ly,28,7);
-    ctx.fillStyle='#333'; ctx.textAlign='left'; ctx.fillText('布板', lx+34, ly+8);
-    // 外手すり
+    ctx.fillStyle='#333'; ctx.textAlign='left'; ctx.fillText('布板（作業床）', lx+34, ly+8);
+    // 手すり
     ctx.strokeStyle='#1144cc'; ctx.lineWidth=2.5;
     ctx.beginPath(); ctx.moveTo(lx,ly+22); ctx.lineTo(lx+28,ly+22); ctx.stroke();
-    ctx.fillStyle='#333'; ctx.fillText('外手摺', lx+34, ly+26);
-    // 中間手すり
-    ctx.strokeStyle='#5577ee'; ctx.lineWidth=1.5;
+    ctx.fillStyle='#333'; ctx.fillText('手すり (+900)', lx+34, ly+26);
+    // 中桟
+    ctx.strokeStyle='#1144cc'; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(lx,ly+38); ctx.lineTo(lx+28,ly+38); ctx.stroke();
-    ctx.fillStyle='#333'; ctx.fillText('中間手摺', lx+34, ly+42);
+    ctx.fillStyle='#333'; ctx.fillText('中桟 (+450)', lx+34, ly+42);
     // ジョイント
     ctx.fillStyle='#cc3300'; ctx.beginPath(); ctx.arc(lx+14,ly+56,4,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#333'; ctx.fillText('くさびジョイント', lx+34, ly+60);
     // 壁つなぎ
     ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(lx+14,ly+76,9,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#333'; ctx.fillText('壁つなぎ', lx+34, ly+80);
-    // 筋交い
-    ctx.strokeStyle='#555'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(lx,ly+92); ctx.lineTo(lx+28,ly+100); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(lx+28,ly+92); ctx.lineTo(lx,ly+100); ctx.stroke();
-    ctx.fillStyle='#333'; ctx.fillText('筋交い', lx+34, ly+98);
   } else {
-    ctx.fillStyle='#333'; ctx.fillRect(lx,ly,28,7); ctx.fillText('布板・水平材', lx+34, ly+8);
-    ctx.strokeStyle='#333'; ctx.lineWidth=2;
+    ctx.fillStyle='#333'; ctx.fillRect(lx,ly,28,7); ctx.fillText('布板（作業床）', lx+34, ly+8);
+    ctx.strokeStyle='#333'; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(lx,ly+22); ctx.lineTo(lx+28,ly+22); ctx.stroke();
     ctx.fillStyle='#333'; ctx.fillText('手摺', lx+34, ly+26);
-    ctx.strokeStyle='#444'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(lx,ly+36); ctx.lineTo(lx+28,ly+44); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(lx+28,ly+36); ctx.lineTo(lx,ly+44); ctx.stroke();
-    ctx.fillStyle='#333'; ctx.fillText('筋交い', lx+34, ly+42);
+    ctx.strokeStyle='#333'; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(lx,ly+38); ctx.lineTo(lx+28,ly+38); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText('中桟', lx+34, ly+42);
     ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(lx+14,ly+58,9,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#333'; ctx.fillText('壁つなぎ', lx+34, ly+62);
     ctx.fillStyle='#444'; ctx.beginPath(); ctx.arc(lx+14,ly+76,4,0,Math.PI*2); ctx.fill();
@@ -1525,8 +2067,10 @@ function drawTitleBar(p, faceName, CW, isColor) {
 //  平面図
 // ============================================================
 function drawPlan(p) {
-  const aoX = p.aoX || p.layoutX.offset;
-  const aoY = p.aoY || p.layoutY.offset;
+  const aoXL = p.aoXL || p.layoutX.offsetLeft;   // West side
+  const aoXR = p.aoXR || p.layoutX.offsetRight;   // East side
+  const aoYL = p.aoYL || p.layoutY.offsetLeft;   // South side (top in plan = north, but Y increases downward)
+  const aoYR = p.aoYR || p.layoutY.offsetRight;   // North side
   const lxPositions = p.layoutX.positions;
   const lyPositions = p.layoutY.positions;
 
@@ -1534,13 +2078,13 @@ function drawPlan(p) {
   canvas.width=CW; canvas.height=CH;
   const ML=160,MR=120,MT=90,MB=120;
   const drawW=CW-ML-MR, drawH=CH-MT-MB;
-  const totalW = p.bldW+(aoX+p.aw)*2+800;
-  const totalH = p.bldD+(aoY+p.aw)*2+800;
+  const totalW = p.bldW+aoXL+aoXR+p.aw*2+800;
+  const totalH = p.bldD+aoYL+aoYR+p.aw*2+800;
   const sc = Math.min(drawW/totalW, drawH/totalH);
 
   function mm(v){ return v*sc; }
-  const OX=ML+mm(aoX+p.aw+400);
-  const OY=MT+mm(aoY+p.aw+400);
+  const OX=ML+mm(aoXL+p.aw+400);
+  const OY=MT+mm(aoYL+p.aw+400);
   function px(v){ return OX+mm(v); }
   function py(v){ return OY+mm(v); }
 
@@ -1553,18 +2097,18 @@ function drawPlan(p) {
   // 足場外側塗り
   if(isColor){
     ctx.fillStyle='rgba(220,235,255,0.6)';
-    ctx.fillRect(px(-aoX-p.aw),py(-aoY-p.aw), mm(p.bldW+(aoX+p.aw)*2), mm(p.bldD+(aoY+p.aw)*2));
+    ctx.fillRect(px(-aoXL-p.aw),py(-aoYL-p.aw), mm(p.bldW+aoXL+aoXR+p.aw*2), mm(p.bldD+aoYL+aoYR+p.aw*2));
     ctx.fillStyle='white';
-    ctx.fillRect(px(-aoX),py(-aoY), mm(p.bldW+aoX*2), mm(p.bldD+aoY*2));
+    ctx.fillRect(px(-aoXL),py(-aoYL), mm(p.bldW+aoXL+aoXR), mm(p.bldD+aoYL+aoYR));
   }
 
   // 足場外側枠
   ctx.strokeStyle=isColor?'#0044cc':'#222'; ctx.lineWidth=2;
-  ctx.strokeRect(px(-aoX-p.aw),py(-aoY-p.aw), mm(p.bldW+(aoX+p.aw)*2), mm(p.bldD+(aoY+p.aw)*2));
+  ctx.strokeRect(px(-aoXL-p.aw),py(-aoYL-p.aw), mm(p.bldW+aoXL+aoXR+p.aw*2), mm(p.bldD+aoYL+aoYR+p.aw*2));
   // 足場内側枠（離れ）
   ctx.setLineDash([6,3]);
   ctx.strokeStyle=isColor?'#0044cc':'#555'; ctx.lineWidth=1.2;
-  ctx.strokeRect(px(-aoX),py(-aoY), mm(p.bldW+aoX*2), mm(p.bldD+aoY*2));
+  ctx.strokeRect(px(-aoXL),py(-aoYL), mm(p.bldW+aoXL+aoXR), mm(p.bldD+aoYL+aoYR));
   ctx.setLineDash([]);
 
   // 建物外壁
@@ -1581,89 +2125,107 @@ function drawPlan(p) {
   // 通り芯
   ctx.strokeStyle='#f00'; ctx.lineWidth=0.7; ctx.setLineDash([10,5,2,5]);
   [0,p.bldW].forEach(cx=>{
-    ctx.beginPath(); ctx.moveTo(px(cx),py(-aoY-p.aw-300)); ctx.lineTo(px(cx),py(p.bldD+aoY+p.aw+300)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(cx),py(-aoYL-p.aw-300)); ctx.lineTo(px(cx),py(p.bldD+aoYR+p.aw+300)); ctx.stroke();
   });
   [0,p.bldD].forEach(cy=>{
-    ctx.beginPath(); ctx.moveTo(px(-aoX-p.aw-300),py(cy)); ctx.lineTo(px(p.bldW+aoX+p.aw+300),py(cy)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(-aoXL-p.aw-300),py(cy)); ctx.lineTo(px(p.bldW+aoXR+p.aw+300),py(cy)); ctx.stroke();
   });
   ctx.setLineDash([]);
 
-  // 布板パネル描画（足場幅に応じたパターン）
-  // 400mm → 斜線1本(/)  600mm → バッテン(×)  900mm → ダブルバッテン(××)
+  // 布板パネル描画
   const panelColor = isColor ? '#ff8c00' : '#555';
   const panelBorder = isColor ? '#cc5500' : '#333';
   const panelFill = isColor ? 'rgba(255,140,0,0.12)' : 'rgba(100,100,100,0.06)';
 
-  // パネル1枚を描画するヘルパー（x1,y1=左上, x2,y2=右下 実座標mm）
   function drawPanel(x1, y1, x2, y2) {
     const sx1=px(x1), sy1=py(y1), sx2=px(x2), sy2=py(y2);
-    // 背景塗り
     ctx.fillStyle = panelFill;
     ctx.fillRect(sx1, sy1, sx2-sx1, sy2-sy1);
-    // 枠線
     ctx.strokeStyle = panelBorder;
     ctx.lineWidth = isColor ? 1.5 : 1;
     ctx.strokeRect(sx1, sy1, sx2-sx1, sy2-sy1);
-    // パターン描画
     ctx.strokeStyle = panelColor;
     ctx.lineWidth = isColor ? 1.8 : 1.2;
     if (p.aw <= 400) {
-      // 斜線1本
+      // W400: 斜線1本（/）
       ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
     } else if (p.aw <= 600) {
-      // バッテン（×）
+      // W600: バッテン1つ（×）
       ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(sx1,sy2); ctx.stroke();
-    } else {
-      // ダブルバッテン（××）：中央で分割して×を2つ
-      const midX = (sx1+sx2)/2, midY = (sy1+sy2)/2;
-      // 分割線
+    } else if (p.aw <= 900) {
+      // W900: 幅方向を2分割、バッテン2つ
       if (Math.abs(sx2-sx1) > Math.abs(sy2-sy1)) {
-        // 横長パネル → 左右に分割
-        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx1,sy2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
-      } else {
-        // 縦長パネル → 上下に分割
+        // 横長パネル → 幅方向（縦）を2分割
+        const midY = (sy1+sy2)/2;
         ctx.beginPath(); ctx.moveTo(sx1,midY); ctx.lineTo(sx2,midY); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,midY); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(sx1,midY); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(sx1,midY); ctx.lineTo(sx2,sy2); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(sx2,midY); ctx.lineTo(sx1,sy2); ctx.stroke();
+      } else {
+        // 縦長パネル → 幅方向（横）を2分割
+        const midX = (sx1+sx2)/2;
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx1,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+      }
+    } else {
+      // W1200: 幅方向を600mm×2に分割、バッテン2つ
+      if (Math.abs(sx2-sx1) > Math.abs(sy2-sy1)) {
+        // 横長パネル → 幅方向（縦）を2分割
+        const midY = (sy1+sy2)/2;
+        ctx.beginPath(); ctx.moveTo(sx1,midY); ctx.lineTo(sx2,midY); ctx.stroke();
+        // 上半分 ×
+        ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(sx2,midY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(sx1,midY); ctx.stroke();
+        // 下半分 ×
+        ctx.beginPath(); ctx.moveTo(sx1,midY); ctx.lineTo(sx2,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,midY); ctx.lineTo(sx1,sy2); ctx.stroke();
+      } else {
+        // 縦長パネル → 幅方向（横）を2分割
+        const midX = (sx1+sx2)/2;
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+        // 左半分 ×
+        ctx.beginPath(); ctx.moveTo(sx1,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx1,sy2); ctx.stroke();
+        // 右半分 ×
+        ctx.beginPath(); ctx.moveTo(midX,sy1); ctx.lineTo(sx2,sy2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx2,sy1); ctx.lineTo(midX,sy2); ctx.stroke();
       }
     }
   }
 
-  // 南面パネル（X方向スパン × 足場幅、建物の南側）
+  // 南面パネル（上＝北 in plan view, so south is bottom）
   for (let i = 0; i < lxPositions.length - 1; i++) {
-    drawPanel(lxPositions[i], -aoY-p.aw, lxPositions[i+1], -aoY);
+    drawPanel(lxPositions[i], -aoYL-p.aw, lxPositions[i+1], -aoYL);
   }
   // 北面パネル
   for (let i = 0; i < lxPositions.length - 1; i++) {
-    drawPanel(lxPositions[i], p.bldD+aoY, lxPositions[i+1], p.bldD+aoY+p.aw);
+    drawPanel(lxPositions[i], p.bldD+aoYR, lxPositions[i+1], p.bldD+aoYR+p.aw);
   }
-  // 西面パネル（Y方向スパン × 足場幅）
+  // 西面パネル
   for (let i = 0; i < lyPositions.length - 1; i++) {
-    drawPanel(-aoX-p.aw, lyPositions[i], -aoX, lyPositions[i+1]);
+    drawPanel(-aoXL-p.aw, lyPositions[i], -aoXL, lyPositions[i+1]);
   }
   // 東面パネル
   for (let i = 0; i < lyPositions.length - 1; i++) {
-    drawPanel(p.bldW+aoX, lyPositions[i], p.bldW+aoX+p.aw, lyPositions[i+1]);
+    drawPanel(p.bldW+aoXR, lyPositions[i], p.bldW+aoXR+p.aw, lyPositions[i+1]);
   }
 
-  // 支柱（パネルの上に描画）
+  // 支柱
   const drawPillar = (xp, yp) => {
     ctx.beginPath(); ctx.arc(px(xp),py(yp),mm(70),0,Math.PI*2);
     ctx.fillStyle='white'; ctx.fill();
     ctx.strokeStyle=isColor?'#0044cc':'#222'; ctx.lineWidth=1.5; ctx.stroke();
   };
-  const yRowPositions = [-aoY, p.bldD+aoY, -aoY-p.aw, p.bldD+aoY+p.aw];
+  const yRowPositions = [-aoYL, p.bldD+aoYR, -aoYL-p.aw, p.bldD+aoYR+p.aw];
   yRowPositions.forEach(yp => {
     lxPositions.forEach(xp => drawPillar(xp, yp));
   });
-  const xColPositions = [-aoX, p.bldW+aoX, -aoX-p.aw, p.bldW+aoX+p.aw];
+  const xColPositions = [-aoXL, p.bldW+aoXR, -aoXL-p.aw, p.bldW+aoXR+p.aw];
   xColPositions.forEach(xp => {
     lyPositions.forEach(yp => drawPillar(xp, yp));
   });
@@ -1678,17 +2240,17 @@ function drawPlan(p) {
 
   // 寸法
   ctx.strokeStyle='#333'; ctx.fillStyle='#333'; ctx.lineWidth=1; ctx.font='10px Share Tech Mono';
-  const yBot = py(p.bldD+aoY+p.aw)+30;
+  const yBot = py(p.bldD+aoYR+p.aw)+30;
   drawDimH(ctx, px(0),px(p.bldW),yBot,`${p.bldW.toLocaleString()}`);
-  drawDimH(ctx, px(-aoX-p.aw),px(p.bldW+aoX+p.aw),yBot+22,`${(p.bldW+(aoX+p.aw)*2).toLocaleString()}`);
-  const xR = px(p.bldW+aoX+p.aw)+30;
+  drawDimH(ctx, px(-aoXL-p.aw),px(p.bldW+aoXR+p.aw),yBot+22,`${(p.bldW+aoXL+aoXR+p.aw*2).toLocaleString()}`);
+  const xR = px(p.bldW+aoXR+p.aw)+30;
   drawDimV(ctx, xR, py(0),py(p.bldD),`${p.bldD.toLocaleString()}`);
-  drawDimV(ctx, xR+22, py(-aoY-p.aw),py(p.bldD+aoY+p.aw),`${(p.bldD+(aoY+p.aw)*2).toLocaleString()}`);
+  drawDimV(ctx, xR+22, py(-aoYL-p.aw),py(p.bldD+aoYR+p.aw),`${(p.bldD+aoYL+aoYR+p.aw*2).toLocaleString()}`);
 
-  // スパン寸法（上）— X方向割付を表示
+  // スパン寸法（上）
   for (let i = 0; i < lxPositions.length - 1; i++) {
     const spanW = lxPositions[i+1] - lxPositions[i];
-    drawDimH(ctx, px(lxPositions[i]), px(lxPositions[i+1]), py(-aoY-p.aw)-18, `${spanW.toLocaleString()}`);
+    drawDimH(ctx, px(lxPositions[i]), px(lxPositions[i+1]), py(-aoYL-p.aw)-18, `${spanW.toLocaleString()}`);
   }
 
   // 北方向矢印
@@ -1824,8 +2386,207 @@ document.querySelector('.btn-primary').onclick = () => {
   });
 })();
 
+// ============================================================
+//  マーキング機能
+// ============================================================
+const mkCanvas = document.getElementById('markupCanvas');
+const mkCtx = mkCanvas.getContext('2d');
+let mkTool = 'select'; // select, pen, line, circle, rect, arrow, text
+let mkDrawing = false;
+let mkStartX = 0, mkStartY = 0;
+let mkStrokes = []; // 描画履歴
+let mkCurrentStroke = null;
+
+function setMarkupTool(tool) {
+  mkTool = tool;
+  document.querySelectorAll('.markup-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('mkBtn' + tool.charAt(0).toUpperCase() + tool.slice(1));
+  if (btn) btn.classList.add('active');
+  mkCanvas.style.pointerEvents = (tool === 'select') ? 'none' : 'auto';
+  mkCanvas.style.cursor = (tool === 'text') ? 'text' : (tool === 'select' ? 'default' : 'crosshair');
+}
+
+function getMkProps() {
+  return {
+    color: document.getElementById('mkColor').value,
+    width: +document.getElementById('mkWidth').value,
+  };
+}
+
+function syncMarkupCanvasSize() {
+  const dCanvas = document.getElementById('drawingCanvas');
+  mkCanvas.width = dCanvas.width;
+  mkCanvas.height = dCanvas.height;
+  redrawMarkup();
+}
+
+function redrawMarkup() {
+  mkCtx.clearRect(0, 0, mkCanvas.width, mkCanvas.height);
+  mkStrokes.forEach(s => drawStroke(mkCtx, s));
+}
+
+function drawStroke(ctx, s) {
+  ctx.strokeStyle = s.color;
+  ctx.fillStyle = s.color;
+  ctx.lineWidth = s.width;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (s.type === 'pen' && s.points.length > 1) {
+    ctx.beginPath();
+    ctx.moveTo(s.points[0].x, s.points[0].y);
+    for (let i = 1; i < s.points.length; i++) {
+      ctx.lineTo(s.points[i].x, s.points[i].y);
+    }
+    ctx.stroke();
+  } else if (s.type === 'line') {
+    ctx.beginPath();
+    ctx.moveTo(s.x1, s.y1);
+    ctx.lineTo(s.x2, s.y2);
+    ctx.stroke();
+  } else if (s.type === 'arrow') {
+    ctx.beginPath();
+    ctx.moveTo(s.x1, s.y1);
+    ctx.lineTo(s.x2, s.y2);
+    ctx.stroke();
+    // 矢印の先端
+    const angle = Math.atan2(s.y2 - s.y1, s.x2 - s.x1);
+    const headLen = 12 + s.width * 2;
+    ctx.beginPath();
+    ctx.moveTo(s.x2, s.y2);
+    ctx.lineTo(s.x2 - headLen * Math.cos(angle - 0.4), s.y2 - headLen * Math.sin(angle - 0.4));
+    ctx.lineTo(s.x2 - headLen * Math.cos(angle + 0.4), s.y2 - headLen * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fill();
+  } else if (s.type === 'circle') {
+    const rx = Math.abs(s.x2 - s.x1) / 2;
+    const ry = Math.abs(s.y2 - s.y1) / 2;
+    const cx = (s.x1 + s.x2) / 2;
+    const cy = (s.y1 + s.y2) / 2;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (s.type === 'rect') {
+    ctx.strokeRect(s.x1, s.y1, s.x2 - s.x1, s.y2 - s.y1);
+  } else if (s.type === 'text') {
+    ctx.font = `bold ${Math.max(14, s.width * 5)}px Noto Sans JP`;
+    ctx.fillText(s.text, s.x1, s.y1);
+  }
+}
+
+function getCanvasPos(e) {
+  const rect = mkCanvas.getBoundingClientRect();
+  const scaleX = mkCanvas.width / rect.width;
+  const scaleY = mkCanvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY,
+  };
+}
+
+mkCanvas.addEventListener('mousedown', (e) => {
+  if (mkTool === 'select') return;
+  const pos = getCanvasPos(e);
+  mkStartX = pos.x;
+  mkStartY = pos.y;
+
+  if (mkTool === 'text') {
+    const text = prompt('テキストを入力:');
+    if (text) {
+      const props = getMkProps();
+      mkStrokes.push({ type: 'text', x1: pos.x, y1: pos.y, text, color: props.color, width: props.width });
+      redrawMarkup();
+    }
+    return;
+  }
+
+  mkDrawing = true;
+  const props = getMkProps();
+
+  if (mkTool === 'pen') {
+    mkCurrentStroke = { type: 'pen', points: [{ x: pos.x, y: pos.y }], color: props.color, width: props.width };
+  } else {
+    mkCurrentStroke = { type: mkTool, x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y, color: props.color, width: props.width };
+  }
+});
+
+mkCanvas.addEventListener('mousemove', (e) => {
+  if (!mkDrawing || !mkCurrentStroke) return;
+  const pos = getCanvasPos(e);
+
+  if (mkTool === 'pen') {
+    mkCurrentStroke.points.push({ x: pos.x, y: pos.y });
+  } else {
+    mkCurrentStroke.x2 = pos.x;
+    mkCurrentStroke.y2 = pos.y;
+  }
+  // プレビュー描画
+  redrawMarkup();
+  drawStroke(mkCtx, mkCurrentStroke);
+});
+
+mkCanvas.addEventListener('mouseup', (e) => {
+  if (!mkDrawing || !mkCurrentStroke) return;
+  mkDrawing = false;
+  const pos = getCanvasPos(e);
+  if (mkTool === 'pen') {
+    mkCurrentStroke.points.push({ x: pos.x, y: pos.y });
+  } else {
+    mkCurrentStroke.x2 = pos.x;
+    mkCurrentStroke.y2 = pos.y;
+  }
+  mkStrokes.push(mkCurrentStroke);
+  mkCurrentStroke = null;
+  redrawMarkup();
+});
+
+mkCanvas.addEventListener('mouseleave', () => {
+  if (mkDrawing && mkCurrentStroke) {
+    mkStrokes.push(mkCurrentStroke);
+    mkCurrentStroke = null;
+    mkDrawing = false;
+    redrawMarkup();
+  }
+});
+
+function undoMarkup() {
+  mkStrokes.pop();
+  redrawMarkup();
+}
+
+function clearMarkup() {
+  if (mkStrokes.length === 0) return;
+  if (confirm('マーキングを全て消去しますか？')) {
+    mkStrokes = [];
+    redrawMarkup();
+  }
+}
+
+// 図面再生成時にマーキングキャンバスサイズを同期（generateの末尾に追加）
+const _origGenerate = generate;
+generate = function() {
+  try {
+    _origGenerate.apply(this, arguments);
+    syncMarkupCanvasSize();
+  } catch(e) {
+    alert('描画エラー: ' + e.message + '\n' + e.stack);
+    console.error(e);
+  }
+};
+
+// 初期状態は選択モード（マーキングOFF）
+setMarkupTool('select');
+
 // 初回生成
-window.onload = () => { generate(); };
+window.onload = () => {
+  try {
+    renderIrregulars();
+    generate();
+  } catch(e) {
+    alert('エラー: ' + e.message + '\n' + e.stack);
+    console.error(e);
+  }
+};
 </script>
 </body>
 </html>
