@@ -7,6 +7,7 @@ import { dashboardRouter } from "./routes/dashboard";
 import { messagesRouter } from "./routes/messages";
 import { candidatesRouter } from "./routes/candidates";
 import { settingsRouter } from "./routes/settings";
+import { setupRouter } from "./routes/setup";
 import { STATUS_LABELS } from "./services/candidateService";
 import { CLASSIFICATION_LABELS, EVENT_TYPES } from "./services/ai";
 import { formatDateJa } from "./utils/dates";
@@ -50,6 +51,7 @@ app.use(dashboardRouter);
 app.use(messagesRouter);
 app.use(candidatesRouter);
 app.use(settingsRouter);
+app.use(setupRouter);
 
 app.use((_req, res) => {
   res.status(404).render("error", { title: "ページが見つかりません", message: "URLをご確認ください。" });

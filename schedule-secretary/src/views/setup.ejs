@@ -1,0 +1,53 @@
+<%- include('partials/header', { pageTitle: '準備' }) %>
+<h1>準備状況</h1>
+<p class="muted">外部サービスの設定が済んでいるかを確認できます。<strong>入力した値そのものはここには表示されません。</strong></p>
+
+<div class="card">
+  <h2>設定チェック <span class="muted">(<%= readyCount %> / <%= checks.length %>)</span></h2>
+  <ul class="event-list">
+    <% checks.forEach(c => { %>
+      <li>
+        <span class="badge badge-<%= c.ok ? 'approved' : 'pending' %>"><%= c.ok ? '設定済み' : '未設定' %></span>
+        <strong><%= c.label %></strong>
+        <div class="muted"><%= c.hint %></div>
+      </li>
+    <% }) %>
+  </ul>
+  <p class="muted">登録先カレンダー: <%= calendarId %></p>
+</div>
+
+<div class="card">
+  <h2>設定サイトへ移動</h2>
+  <p class="muted">上から順に進めてください。それぞれ別タブで開きます。</p>
+
+  <h3>02. OpenAI(文章を読むAI)</h3>
+  <a class="btn btn-primary btn-block" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">APIキーの発行画面 →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">支払い方法・残高 →</a>
+
+  <h3 class="mt-8">03. Google(カレンダー登録の許可)</h3>
+  <a class="btn btn-primary btn-block" href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">3-1 プロジェクトを作る →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" rel="noopener">3-2 カレンダー機能を有効にする →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener">3-3 利用者の登録 →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">3-4 IDとシークレットを作る →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://developers.google.com/oauthplayground" target="_blank" rel="noopener">3-5 許可トークンを受け取る →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://calendar.google.com/calendar/u/0/r/settings" target="_blank" rel="noopener">3-6 登録先カレンダーを決める →</a>
+  <p class="alert alert-warn mt-8">3-3では最後に<strong>「本番環境に公開」</strong>を押してください。テストのままだと許可が7日で切れ、カレンダー登録が止まります。</p>
+
+  <h3>04. Railway(動かす場所)</h3>
+  <a class="btn btn-primary btn-block" href="https://railway.app/dashboard" target="_blank" rel="noopener">Railway を開く →</a>
+
+  <h3 class="mt-8">05. LINE(第3段階・今は不要)</h3>
+  <a class="btn btn-ghost btn-block" href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers →</a>
+  <a class="btn btn-ghost btn-block mt-8" href="https://manager.line.biz/" target="_blank" rel="noopener">LINE公式アカウントマネージャー →</a>
+</div>
+
+<div class="card">
+  <h2>つまずいたときは</h2>
+  <p><strong>カレンダー登録が「登録エラー」になる</strong><br>
+  <span class="muted">Googleの値のどれかが違っています。承認済みにはならず再登録ボタンが出るので、値を直して押し直せば登録されます。予定が消えることはありません。</span></p>
+  <p class="mt-8"><strong>1週間ほどで登録が止まった</strong><br>
+  <span class="muted">3-3の「本番環境に公開」が未実施です。押したうえで3-5をやり直し、新しい許可トークンに入れ替えてください。</span></p>
+  <p class="mt-8"><strong>AIの読み取りがおかしい</strong><br>
+  <span class="muted">承認前なのでカレンダーには何も登録されていません。その文章を控えておいてください。</span></p>
+</div>
+<%- include('partials/footer') %>
