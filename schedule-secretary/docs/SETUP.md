@@ -7,13 +7,16 @@
 
 ## 01. GitHub — プログラムの保存先(3分・無料・最優先)
 
-**開く → https://github.com/settings/installations**
+**開く → https://github.com/apps/claude**
 
-1. 一覧から **Claude** を探して **Configure** を押す
-2. **Repository access** に `ashiba-scaffold-system` が含まれているか確認する
-3. 無ければ **Only select repositories** から追加して **Save**
+1. **Install**(すでに入っていれば **Configure**)を押す
+2. **Only select repositories** を選び `ashiba-scaffold-system` を追加する
+3. **Install** / **Save** を押す
 
-> 書き込み権限が無いと、完成したプログラムをGitHubへ保存(push)できません。
+インストール済みアプリの確認は → https://github.com/settings/installations
+
+> Claudeアプリが未インストールだと、公開リポジトリの読み取りは通っても書き込み(push)が403で拒否されます。
+> 一覧にClaudeが無ければ、設定変更ではなく**インストール**が必要です。
 
 **手に入るもの**: プログラムの保存(値の入力なし)
 
