@@ -1,0 +1,159 @@
+<%- include('partials/header', { pageTitle: '予定候補の確認' }) %>
+
+<div class="candidate-head">
+  <span class="badge badge-<%= candidate.status %>"><%= statusLabel %></span>
+  <span class="confidence">AI信頼度 <%= Math.round((candidate.confidence || 0) * 100) %>%</span>
+</div>
+<h1>予定候補の確認・承認</h1>
+
+<% if (flash) { %><p class="alert alert-ok"><%= flash %></p><% } %>
+<% if (error) { %><p class="alert alert-error"><%= error %></p><% } %>
+
+<% if (candidate.status === 'register_error') { %>
+  <div class="alert alert-error">
+    Googleカレンダーへの登録に失敗しました。内容を確認して再登録してください。
+    <form method="post" action="/candidates/<%= candidate.id %>/retry" class="mt-8">
+      <button class="btn btn-primary">再登録する</button>
+    </form>
+  </div>
+<% } %>
+
+<% if ((data.missing_fields || []).length > 0 && !['approved','rejected'].includes(candidate.status)) { %>
+  <p class="alert alert-warn">不足情報: <%= data.missing_fields.join('、') %><br>下のフォームで補完してから承認してください。AIは不明な項目を推測しません。</p>
+<% } %>
+<% if (data.date_candidates && data.date_candidates.length > 0 && !data.date) { %>
+  <p class="alert alert-warn">AIが提示した日付候補(未確定): <%= data.date_candidates.map(x => formatDateJa(x)).join('、') %><br>正しければ下の日付欄に入力してください。</p>
+<% } %>
+<% if (data.notes && data.notes.length > 0) { %>
+  <div class="card"><h3>AIからの注記・備考</h3><ul><% data.notes.forEach(n => { %><li><%= n %></li><% }) %></ul></div>
+<% } %>
+
+<% const editable = !['approved'].includes(candidate.status); %>
+<form method="post" action="/candidates/<%= candidate.id %>/approve" class="card stack" id="edit-form">
+  <h2>予定内容<%= editable ? '(すべて修正できます)' : '' %></h2>
+
+  <div class="grid-2">
+    <label>予定の種類
+      <select name="event_type" <%= editable ? '' : 'disabled' %>>
+        <option value="">未選択</option>
+        <% EVENT_TYPES.forEach(t => { %>
+          <option value="<%= t %>" <%= data.event_type === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>現場名
+      <input type="text" name="title" value="<%= data.title || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>日付 <span class="req">承認に必須</span>
+      <input type="date" name="date" value="<%= data.date || (data.date_candidates && data.date_candidates[0]) || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label class="checkbox-label"><input type="checkbox" name="all_day" <%= data.all_day ? 'checked' : '' %> <%= editable ? '' : 'disabled' %>> 終日予定</label>
+    <label>開始時刻
+      <input type="time" name="start_time" value="<%= data.start_time || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>終了時刻
+      <input type="time" name="end_time" value="<%= data.end_time || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>元請名
+      <input type="text" name="client_name" value="<%= data.client_name || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>依頼者名
+      <input type="text" name="requester_name" value="<%= data.requester_name || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>現場住所
+      <input type="text" name="address" value="<%= data.address || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>作業内容
+      <input type="text" name="work_description" value="<%= data.work_description || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>必要人数
+      <input type="number" name="workers" min="0" value="<%= data.workers ?? '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>担当者
+      <input type="text" name="assignee" value="<%= data.assignee || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>集合時間
+      <input type="text" name="meeting_time" value="<%= data.meeting_time || '' %>" placeholder="例) 8:30" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>集合場所
+      <input type="text" name="meeting_place" value="<%= data.meeting_place || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>持ち物
+      <input type="text" name="items" value="<%= data.items || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+    <label>必要車両
+      <input type="text" name="vehicles" value="<%= data.vehicles || '' %>" <%= editable ? '' : 'disabled' %>>
+    </label>
+  </div>
+  <label>注意事項
+    <input type="text" name="cautions" value="<%= data.cautions || '' %>" <%= editable ? '' : 'disabled' %>>
+  </label>
+  <label>備考(1行に1件。Googleカレンダーの説明欄に記載されます)
+    <textarea name="notes" rows="3" <%= editable ? '' : 'disabled' %>><%= (data.notes || []).join('\n') %></textarea>
+  </label>
+  <label class="checkbox-label"><input type="checkbox" name="is_tentative" <%= data.is_tentative ? 'checked' : '' %> <%= editable ? '' : 'disabled' %>> 仮予定として扱う</label>
+
+  <% if (editable) { %>
+    <div class="action-bar">
+      <button type="submit" class="btn btn-approve btn-lg">承認してカレンダーへ登録</button>
+      <button type="submit" form="edit-form" formaction="/candidates/<%= candidate.id %>/save" class="btn btn-secondary btn-lg">修正を保存(登録しない)</button>
+    </div>
+  <% } %>
+</form>
+
+<% if (editable) { %>
+<div class="card stack">
+  <h2>その他の操作</h2>
+  <details>
+    <summary class="btn btn-reject btn-block">拒否する(カレンダーへ登録しない)</summary>
+    <form method="post" action="/candidates/<%= candidate.id %>/reject" class="stack mt-8">
+      <label>拒否理由(任意)
+        <select name="reason_preset">
+          <option value="">選択してください</option>
+          <option>単なる連絡</option>
+          <option>まだ未確定</option>
+          <option>日程が違う</option>
+          <option>重複</option>
+          <option>不要</option>
+          <option>その他</option>
+        </select>
+      </label>
+      <label>詳細(任意)
+        <input type="text" name="reason" placeholder="理由の補足">
+      </label>
+      <button class="btn btn-reject">拒否を確定する</button>
+      <p class="muted">拒否した情報は削除されず、履歴として保存されます。</p>
+    </form>
+  </details>
+  <details>
+    <summary class="btn btn-secondary btn-block">備考を追加</summary>
+    <form method="post" action="/candidates/<%= candidate.id %>/note" class="stack mt-8">
+      <label>備考(例: 高所作業車必要、ヘルメット持参)
+        <input type="text" name="note" required>
+      </label>
+      <button class="btn btn-secondary">追加する</button>
+    </form>
+  </details>
+  <form method="post" action="/candidates/<%= candidate.id %>/hold">
+    <button class="btn btn-ghost btn-block">保留にする</button>
+  </form>
+</div>
+<% } %>
+
+<% if (candidate.status === 'approved') { %>
+<div class="card">
+  <h2>登録情報</h2>
+  <dl class="kv">
+    <dt>承認者</dt><dd><%= candidate.approvedBy ? candidate.approvedBy.name : '-' %></dd>
+    <dt>承認日時</dt><dd><%= candidate.approvedAt ? fmtDateTime(candidate.approvedAt) : '-' %></dd>
+    <dt>イベントID</dt><dd><%= candidate.googleEventId %></dd>
+  </dl>
+</div>
+<% } %>
+
+<div class="card">
+  <h3>元の文章</h3>
+  <pre class="source-text"><%= candidate.sourceText %></pre>
+  <p class="muted">受信日時: <%= candidate.message ? fmtDateTime(candidate.message.receivedAt) : fmtDateTime(candidate.createdAt) %> / 送信元: <%= candidate.message ? (candidate.message.senderName || candidate.message.source) : '-' %> / AI判定: <%= CLASSIFICATION_LABELS[candidate.aiClassification] || candidate.aiClassification %></p>
+</div>
+<%- include('partials/footer') %>

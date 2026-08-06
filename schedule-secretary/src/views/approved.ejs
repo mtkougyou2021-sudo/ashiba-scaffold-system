@@ -1,0 +1,20 @@
+<%- include('partials/header', { pageTitle: '登録完了' }) %>
+<div class="card approved-card">
+  <h1>✅ 登録完了</h1>
+  <p>Googleカレンダーへ予定を登録しました。</p>
+  <dl class="kv">
+    <dt>予定名</dt><dd><%= registered.title %></dd>
+    <dt>日時</dt><dd><%= registered.dateLabel %></dd>
+    <dt>カレンダー</dt><dd><%= registered.calendarId %></dd>
+    <dt>登録した人</dt><dd><%= registered.approverName %></dd>
+    <dt>承認日時</dt><dd><%= fmtDateTime(registered.approvedAt) %></dd>
+  </dl>
+  <% if (registered.htmlLink) { %>
+    <a href="<%= registered.htmlLink %>" target="_blank" rel="noopener" class="btn btn-primary btn-block">Googleカレンダーで開く</a>
+  <% } %>
+  <div class="action-bar mt-8">
+    <a href="/candidates?status=pending" class="btn btn-secondary">承認待ち一覧へ</a>
+    <a href="/" class="btn btn-ghost">ホームへ</a>
+  </div>
+</div>
+<%- include('partials/footer') %>

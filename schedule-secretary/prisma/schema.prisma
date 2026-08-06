@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("approver") // approver / viewer
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  approvedCandidates ScheduleCandidate[] @relation("ApprovedBy")
+  approvalLogs       ApprovalLog[]
+  calendarEvents     CalendarEvent[]
+  attachments        Attachment[]
+
+  @@map("users")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  source     String // admin_text / admin_upload / line / gmail
+  senderName String?  @map("sender_name")
+  rawText    String?  @map("raw_text")
+  receivedAt DateTime @default(now()) @map("received_at")
+  status     String   @default("received") // received / analyzed / analyze_error
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  attachments Attachment[]
+  candidates  ScheduleCandidate[]
+
+  @@map("messages")
+}
+
+model Attachment {
+  id           Int      @id @default(autoincrement())
+  messageId    Int?     @map("message_id")
+  filename     String
+  mimeType     String   @map("mime_type")
+  storagePath  String   @map("storage_path")
+  size         Int      @default(0)
+  ocrText      String?  @map("ocr_text")
+  uploadedById Int?     @map("uploaded_by_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  message    Message?            @relation(fields: [messageId], references: [id])
+  uploadedBy User?               @relation(fields: [uploadedById], references: [id])
+  candidates ScheduleCandidate[]
+
+  @@map("attachments")
+}
+
+model ScheduleCandidate {
+  id               Int       @id @default(autoincrement())
+  messageId        Int?      @map("message_id")
+  attachmentId     Int?      @map("attachment_id")
+  sourceText       String    @map("source_text")
+  extractedData    Json      @map("extracted_data") // AI抽出結果(修正前データ)
+  modifiedData     Json?     @map("modified_data") // 承認者による修正後データ
+  aiClassification String    @map("ai_classification")
+  confidence       Float?
+  missingFields    Json      @default("[]") @map("missing_fields")
+  isTentative      Boolean   @default(false) @map("is_tentative")
+  changeType       String    @default("new") @map("change_type") // new / change / cancel
+  status           String    @default("pending")
+  approvedById     Int?      @map("approved_by_id")
+  approvedAt       DateTime? @map("approved_at")
+  rejectReason     String?   @map("reject_reason")
+  googleEventId    String?   @map("google_event_id")
+  relatedEventId   Int?      @map("related_event_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  message        Message?        @relation(fields: [messageId], references: [id])
+  attachment     Attachment?     @relation(fields: [attachmentId], references: [id])
+  approvedBy     User?           @relation("ApprovedBy", fields: [approvedById], references: [id])
+  relatedEvent   CalendarEvent?  @relation("RelatedEvent", fields: [relatedEventId], references: [id])
+  calendarEvents CalendarEvent[] @relation("CandidateEvents")
+  approvalLogs   ApprovalLog[]
+
+  @@index([status])
+  @@map("schedule_candidates")
+}
+
+model CalendarEvent {
+  id             Int       @id @default(autoincrement())
+  candidateId    Int?      @map("candidate_id")
+  googleEventId  String    @map("google_event_id")
+  calendarId     String    @map("calendar_id")
+  title          String
+  startAt        DateTime  @map("start_at")
+  endAt          DateTime? @map("end_at")
+  allDay         Boolean   @default(false) @map("all_day")
+  status         String    @default("registered") // registered / updated / cancelled / deleted
+  registeredById Int       @map("registered_by_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  candidate         ScheduleCandidate?  @relation("CandidateEvents", fields: [candidateId], references: [id])
+  registeredBy      User                @relation(fields: [registeredById], references: [id])
+  relatedCandidates ScheduleCandidate[] @relation("RelatedEvent")
+
+  @@index([startAt])
+  @@map("calendar_events")
+}
+
+model ApprovalLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  candidateId Int?     @map("candidate_id")
+  action      String // approve / modify / reject / hold / add_note / calendar_register / calendar_update / calendar_delete / reanalyze
+  detail      Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user      User               @relation(fields: [userId], references: [id])
+  candidate ScheduleCandidate? @relation(fields: [candidateId], references: [id])
+
+  @@map("approval_logs")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model ErrorLog {
+  id        Int      @id @default(autoincrement())
+  context   String
+  message   String
+  detail    Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("error_logs")
+}

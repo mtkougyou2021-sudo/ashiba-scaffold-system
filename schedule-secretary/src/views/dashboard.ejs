@@ -1,0 +1,62 @@
+<%- include('partials/header', { pageTitle: 'ダッシュボード' }) %>
+<h1>ダッシュボード</h1>
+
+<div class="stat-grid">
+  <a class="stat stat-warn" href="/candidates?status=pending"><span class="stat-num"><%= countMap.pending || 0 %></span><span>承認待ち</span></a>
+  <a class="stat" href="/candidates?status=insufficient"><span class="stat-num"><%= countMap.insufficient || 0 %></span><span>情報不足</span></a>
+  <a class="stat" href="/candidates?status=tentative"><span class="stat-num"><%= countMap.tentative || 0 %></span><span>仮予定</span></a>
+  <a class="stat" href="/candidates?status=change_candidate"><span class="stat-num"><%= countMap.change_candidate || 0 %></span><span>変更候補</span></a>
+  <a class="stat" href="/candidates?status=cancel_candidate"><span class="stat-num"><%= countMap.cancel_candidate || 0 %></span><span>中止候補</span></a>
+  <a class="stat stat-error" href="/candidates?status=register_error"><span class="stat-num"><%= countMap.register_error || 0 %></span><span>登録エラー</span></a>
+</div>
+
+<div class="card">
+  <h2>本日の予定</h2>
+  <% if (todayEvents.length === 0) { %><p class="muted">登録された予定はありません</p><% } %>
+  <ul class="event-list">
+    <% todayEvents.forEach(ev => { %>
+      <li><span class="time"><%= ev.allDay ? '終日' : ev.startAt.toLocaleTimeString('ja-JP', {hour: '2-digit', minute: '2-digit'}) %></span> <%= ev.title %></li>
+    <% }) %>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>明日の予定</h2>
+  <% if (tomorrowEvents.length === 0) { %><p class="muted">登録された予定はありません</p><% } %>
+  <ul class="event-list">
+    <% tomorrowEvents.forEach(ev => { %>
+      <li><span class="time"><%= ev.allDay ? '終日' : ev.startAt.toLocaleTimeString('ja-JP', {hour: '2-digit', minute: '2-digit'}) %></span> <%= ev.title %></li>
+    <% }) %>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>今週の予定</h2>
+  <% if (weekEvents.length === 0) { %><p class="muted">登録された予定はありません</p><% } %>
+  <ul class="event-list">
+    <% weekEvents.forEach(ev => { %>
+      <li><span class="time"><%= fmtDateTime(ev.startAt) %></span> <%= ev.title %></li>
+    <% }) %>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>最近登録された予定</h2>
+  <% if (recentEvents.length === 0) { %><p class="muted">まだ登録がありません</p><% } %>
+  <ul class="event-list">
+    <% recentEvents.forEach(ev => { %>
+      <li><span class="time"><%= fmtDateTime(ev.startAt) %></span> <%= ev.title %></li>
+    <% }) %>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>処理エラー</h2>
+  <% if (recentErrors.length === 0) { %><p class="muted">エラーはありません</p><% } %>
+  <ul class="event-list">
+    <% recentErrors.forEach(e => { %>
+      <li><span class="time"><%= fmtDateTime(e.createdAt) %></span> [<%= e.context %>] <%= e.message %></li>
+    <% }) %>
+  </ul>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,30 @@
+<%- include('partials/header', { pageTitle: statusLabel + '一覧' }) %>
+<h1><%= statusLabel %>一覧 <span class="muted">(<%= candidates.length %>件)</span></h1>
+
+<% if (candidates.length === 0) { %>
+  <p class="muted">該当する予定候補はありません。</p>
+<% } %>
+
+<% candidates.forEach(c => { const d = effectiveData(c); %>
+  <div class="card candidate-card">
+    <div class="candidate-head">
+      <span class="badge badge-<%= c.status %>"><%= STATUS_LABELS[c.status] %></span>
+      <span class="confidence">AI信頼度 <%= Math.round((c.confidence || 0) * 100) %>%</span>
+    </div>
+    <h2><%= buildEventTitle(d) %></h2>
+    <dl class="kv">
+      <dt>日付</dt><dd><%= d.date ? formatDateJa(d.date) : (d.date_candidates && d.date_candidates.length ? '候補: ' + d.date_candidates.map(x => formatDateJa(x)).join('、') : '未確定') %></dd>
+      <dt>時刻</dt><dd><%= d.start_time || '未確定' %><%= d.end_time ? '〜' + d.end_time : '' %></dd>
+      <% if (d.missing_fields && d.missing_fields.length && c.status !== 'approved') { %>
+        <dt>不足情報</dt><dd class="text-warn"><%= d.missing_fields.join('、') %></dd>
+      <% } %>
+      <% if (c.status === 'rejected' && c.rejectReason) { %><dt>拒否理由</dt><dd><%= c.rejectReason %></dd><% } %>
+      <% if (c.status === 'approved' && c.approvedBy) { %>
+        <dt>承認</dt><dd><%= c.approvedBy.name %> / <%= fmtDateTime(c.approvedAt) %></dd>
+      <% } %>
+    </dl>
+    <p class="source-preview"><%= c.sourceText.length > 60 ? c.sourceText.slice(0, 60) + '…' : c.sourceText %></p>
+    <a href="/candidates/<%= c.id %>" class="btn btn-primary btn-block">詳細を開く</a>
+  </div>
+<% }) %>
+<%- include('partials/footer') %>

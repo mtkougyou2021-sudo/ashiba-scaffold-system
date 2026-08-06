@@ -1,0 +1,170 @@
+/* スマートフォン優先のレスポンシブデザイン */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #1a6b54;
+  --primary-dark: #10513f;
+  --bg: #f4f6f5;
+  --card: #ffffff;
+  --text: #1f2a26;
+  --muted: #6b7a74;
+  --border: #d8e0dc;
+  --warn: #b7791f;
+  --error: #c0392b;
+  --ok: #1a6b54;
+}
+body {
+  font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.topbar {
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+}
+.brand { color: #fff; text-decoration: none; font-weight: 700; font-size: 1.05rem; }
+.topnav { display: flex; align-items: center; gap: 8px; }
+.username { font-size: 0.85rem; opacity: 0.9; }
+.mainnav {
+  background: var(--primary-dark);
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+.mainnav a {
+  color: #e8f2ee;
+  text-decoration: none;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.mainnav a.nav-primary { background: #2c8a6e; font-weight: 700; }
+.container { max-width: 760px; margin: 0 auto; padding: 14px 12px 40px; }
+h1 { font-size: 1.3rem; margin: 10px 0; }
+h2 { font-size: 1.05rem; margin-bottom: 8px; }
+h3 { font-size: 0.95rem; margin-bottom: 6px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin: 12px 0;
+}
+.login-card { max-width: 400px; margin: 40px auto; }
+.stack > * + * { margin-top: 10px; }
+label { display: block; font-size: 0.9rem; font-weight: 600; }
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px; /* iOSのズーム防止 */
+  background: #fff;
+}
+textarea { resize: vertical; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.checkbox-label input { width: 22px; height: 22px; margin: 0; }
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 560px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  background: #e3e9e6;
+  color: var(--text);
+  width: auto;
+}
+.btn-lg { min-height: 52px; font-size: 1.05rem; }
+.btn-sm { min-height: 34px; padding: 4px 10px; font-size: 0.85rem; }
+.btn-block { display: flex; width: 100%; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-approve { background: #1c7c3e; color: #fff; }
+.btn-reject { background: var(--error); color: #fff; }
+.btn-secondary { background: #33566c; color: #fff; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: inherit; }
+.topbar .btn-ghost { color: #fff; border-color: rgba(255,255,255,0.5); }
+.action-bar { display: flex; flex-direction: column; gap: 10px; }
+@media (min-width: 560px) { .action-bar { flex-direction: row; } .action-bar .btn { flex: 1; } }
+.inline { display: inline; }
+.mt-8 { margin-top: 8px; }
+
+.alert { padding: 10px 12px; border-radius: 8px; margin: 10px 0; background: #eef1f0; }
+.alert-error { background: #fdecea; color: var(--error); border: 1px solid #f5c6c0; }
+.alert-warn { background: #fef6e7; color: var(--warn); border: 1px solid #f0dcae; }
+.alert-ok { background: #e8f5ef; color: var(--ok); border: 1px solid #bfe0d2; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #e3e9e6;
+}
+.badge-pending { background: #fef6e7; color: var(--warn); }
+.badge-insufficient { background: #fdecea; color: var(--error); }
+.badge-tentative { background: #ece7f7; color: #5b4a91; }
+.badge-change_candidate { background: #e7f0f7; color: #2a5f88; }
+.badge-cancel_candidate { background: #f7e7e7; color: #8a2f2f; }
+.badge-approved { background: #e8f5ef; color: var(--ok); }
+.badge-rejected { background: #eeeeee; color: #555; }
+.badge-on_hold { background: #f0f0e0; color: #6b6b1f; }
+.badge-register_error { background: #fdecea; color: var(--error); }
+.badge-out_of_scope { background: #f0f0f0; color: #777; }
+
+.candidate-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.confidence { font-size: 0.85rem; color: var(--muted); }
+.kv { display: grid; grid-template-columns: 6.5em 1fr; gap: 2px 10px; margin: 8px 0; }
+.kv dt { color: var(--muted); font-size: 0.88rem; }
+.kv dd { font-size: 0.95rem; }
+.text-warn { color: var(--warn); font-weight: 700; }
+.muted { color: var(--muted); font-size: 0.9rem; }
+.req { color: var(--error); font-size: 0.78rem; }
+.source-text { white-space: pre-wrap; word-break: break-all; background: #f6f8f7; padding: 10px; border-radius: 8px; font-size: 0.92rem; font-family: inherit; }
+.source-preview { color: var(--muted); font-size: 0.88rem; margin: 6px 0; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+}
+.stat-num { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+.stat-warn .stat-num { color: var(--warn); }
+.stat-error .stat-num { color: var(--error); }
+
+.event-list { list-style: none; }
+.event-list li { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.93rem; }
+.event-list li:last-child { border-bottom: none; }
+.event-list .time { color: var(--muted); font-size: 0.85rem; margin-right: 8px; }
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+
+.approved-card { border: 2px solid var(--ok); }
+.footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 16px; }

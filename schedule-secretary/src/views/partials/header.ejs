@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' | ' : '' %>MT興業 予定管理秘書</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="/" class="brand">MT興業 予定管理秘書</a>
+  <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+  <nav class="topnav">
+    <span class="username"><%= currentUser.name %></span>
+    <form method="post" action="/logout" class="inline"><button class="btn btn-ghost btn-sm">ログアウト</button></form>
+  </nav>
+  <% } %>
+</header>
+<% if (typeof currentUser !== 'undefined' && currentUser) { %>
+<nav class="mainnav">
+  <a href="/">ホーム</a>
+  <a href="/messages/new" class="nav-primary">＋文章入力</a>
+  <a href="/candidates?status=pending">承認待ち</a>
+  <a href="/candidates?status=insufficient">情報不足</a>
+  <a href="/candidates?status=tentative">仮予定</a>
+  <a href="/candidates?status=change_candidate">変更候補</a>
+  <a href="/candidates?status=cancel_candidate">中止候補</a>
+  <a href="/candidates?status=approved">承認済み</a>
+  <a href="/candidates?status=rejected">拒否</a>
+  <a href="/history">履歴</a>
+  <a href="/settings">設定</a>
+</nav>
+<% } %>
+<main class="container">

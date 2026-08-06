@@ -1,0 +1,14 @@
+<%- include('partials/header', { pageTitle: '文章入力' }) %>
+<h1>文章からAIで予定候補を作成</h1>
+<p class="muted">LINEやメールで受け取った文章を貼り付けてください。AIが予定候補を抽出します。<br>
+<strong>この時点ではカレンダーに登録されません。</strong>承認した予定だけが登録されます。</p>
+<% if (error) { %><p class="alert alert-error"><%= error %></p><% } %>
+<div class="card">
+  <form method="post" action="/messages" class="stack">
+    <label>受信した文章
+      <textarea name="text" rows="8" required placeholder="例) 8月10日9時に港区〇〇工場で現調お願いします"></textarea>
+    </label>
+    <button type="submit" class="btn btn-primary btn-lg">AIで解析する</button>
+  </form>
+</div>
+<%- include('partials/footer') %>

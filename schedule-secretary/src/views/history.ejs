@@ -1,0 +1,30 @@
+<%- include('partials/header', { pageTitle: '履歴' }) %>
+<h1>Googleカレンダー登録履歴</h1>
+<% if (events.length === 0) { %><p class="muted">登録履歴はありません。</p><% } %>
+<% events.forEach(ev => { %>
+  <div class="card">
+    <div class="candidate-head">
+      <span class="badge badge-approved"><%= {registered: '登録', updated: '更新', cancelled: 'キャンセル', deleted: '削除'}[ev.status] || ev.status %></span>
+      <span class="muted"><%= fmtDateTime(ev.createdAt) %></span>
+    </div>
+    <h2><%= ev.title %></h2>
+    <dl class="kv">
+      <dt>日時</dt><dd><%= ev.allDay ? formatDateJa(ev.startAt.toISOString().slice(0,10)) + '(終日)' : fmtDateTime(ev.startAt) %></dd>
+      <dt>カレンダー</dt><dd><%= ev.calendarId %></dd>
+      <dt>登録者</dt><dd><%= ev.registeredBy.name %></dd>
+      <% if (ev.candidate) { %><dt>候補</dt><dd><a href="/candidates/<%= ev.candidate.id %>">#<%= ev.candidate.id %> を開く</a></dd><% } %>
+    </dl>
+  </div>
+<% }) %>
+
+<h1>操作履歴</h1>
+<div class="card">
+  <% if (logs.length === 0) { %><p class="muted">操作履歴はありません。</p><% } %>
+  <ul class="event-list">
+    <% const ACTION_LABELS = {approve: '承認', modify: '修正', reject: '拒否', hold: '保留', add_note: '備考追加', calendar_register: 'カレンダー登録', calendar_update: 'カレンダー更新', calendar_delete: 'カレンダー削除', reanalyze: '再解析'}; %>
+    <% logs.forEach(l => { %>
+      <li><span class="time"><%= fmtDateTime(l.createdAt) %></span> <%= l.user.name %> が <%= ACTION_LABELS[l.action] || l.action %><% if (l.candidateId) { %> (<a href="/candidates/<%= l.candidateId %>">候補#<%= l.candidateId %></a>)<% } %></li>
+    <% }) %>
+  </ul>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,35 @@
+<%- include('partials/header', { pageTitle: '解析結果' }) %>
+<h1>AI解析結果</h1>
+
+<% if (error) { %>
+  <p class="alert alert-error">AI解析に失敗しました: <%= error %><br>元の文章は保存されています。</p>
+  <form method="post" action="/messages/<%= message.id %>/reanalyze">
+    <button class="btn btn-primary">再解析する</button>
+  </form>
+<% } else if (candidates.length === 0) { %>
+  <p class="alert">予定候補は抽出されませんでした。</p>
+<% } else { %>
+  <p class="muted"><%= candidates.length %>件の候補を抽出しました。内容を確認し、それぞれ承認・修正・拒否してください。</p>
+  <% candidates.forEach(c => { const d = c.extractedData; %>
+    <div class="card candidate-card">
+      <div class="candidate-head">
+        <span class="badge badge-<%= c.status %>"><%= STATUS_LABELS[c.status] %></span>
+        <span class="confidence">AI信頼度 <%= Math.round((c.confidence || 0) * 100) %>%</span>
+      </div>
+      <h2><%= d.event_type ? '【' + d.event_type + '】' : '' %><%= d.title || d.address || '(現場名未確定)' %></h2>
+      <dl class="kv">
+        <dt>日付</dt><dd><%= d.date ? formatDateJa(d.date) : (d.date_candidates && d.date_candidates.length ? '候補: ' + d.date_candidates.map(x => formatDateJa(x)).join('、') + '(要確認)' : '未確定') %></dd>
+        <dt>時刻</dt><dd><%= d.start_time || '未確定' %><%= d.end_time ? '〜' + d.end_time : '' %></dd>
+        <% if (d.workers) { %><dt>人数</dt><dd><%= d.workers %>名</dd><% } %>
+        <% if (d.missing_fields && d.missing_fields.length) { %><dt>不足情報</dt><dd class="text-warn"><%= d.missing_fields.join('、') %></dd><% } %>
+      </dl>
+      <a href="/candidates/<%= c.id %>" class="btn btn-primary btn-block">確認・承認へ進む</a>
+    </div>
+  <% }) %>
+<% } %>
+
+<div class="card">
+  <h3>元の文章</h3>
+  <pre class="source-text"><%= message.rawText %></pre>
+</div>
+<%- include('partials/footer') %>

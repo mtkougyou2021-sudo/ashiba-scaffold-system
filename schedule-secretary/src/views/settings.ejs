@@ -1,0 +1,41 @@
+<%- include('partials/header', { pageTitle: '設定' }) %>
+<h1>設定</h1>
+<% if (saved) { %><p class="alert alert-ok">設定を保存しました。</p><% } %>
+
+<form method="post" action="/settings" class="stack">
+  <div class="card stack">
+    <h2>通知(Googleカレンダー)</h2>
+    <label>前日の通知時刻(時)
+      <input type="number" name="dayBeforeHour" min="0" max="23" value="<%= settings.notifications.dayBeforeHour %>">
+    </label>
+    <label>開始何分前に通知するか
+      <input type="number" name="minutesBefore" min="0" max="40320" value="<%= settings.notifications.minutesBefore %>">
+    </label>
+    <label>終了時刻が無い場合の所要時間(時間)
+      <input type="number" name="defaultEventHours" min="1" max="24" value="<%= settings.defaultEventHours %>">
+    </label>
+  </div>
+
+  <div class="card stack">
+    <h2>登録先カレンダー</h2>
+    <label>GoogleカレンダーID
+      <input type="text" name="calendarId" value="<%= settings.calendarId %>" placeholder="primary またはカレンダーID">
+    </label>
+  </div>
+
+  <div class="card stack">
+    <h2>予定の種類別の色分け</h2>
+    <% Object.keys(settings.colors).forEach(type => { %>
+      <label><%= type %>
+        <select name="color_<%= type %>">
+          <% Object.entries(googleColors).forEach(([id, name]) => { %>
+            <option value="<%= id %>" <%= settings.colors[type] === id ? 'selected' : '' %>><%= name %></option>
+          <% }) %>
+        </select>
+      </label>
+    <% }) %>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-lg">設定を保存</button>
+</form>
+<%- include('partials/footer') %>

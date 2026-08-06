@@ -1,0 +1,15 @@
+<%- include('partials/header', { pageTitle: 'ログイン' }) %>
+<div class="card login-card">
+  <h1>ログイン</h1>
+  <% if (error) { %><p class="alert alert-error"><%= error %></p><% } %>
+  <form method="post" action="/login" class="stack">
+    <label>メールアドレス
+      <input type="email" name="email" required autocomplete="username" inputmode="email">
+    </label>
+    <label>パスワード
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button type="submit" class="btn btn-primary btn-lg">ログイン</button>
+  </form>
+</div>
+<%- include('partials/footer') %>
