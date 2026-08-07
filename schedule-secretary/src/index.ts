@@ -46,6 +46,17 @@ app.use((_req, res, next) => {
   next();
 });
 
+// 稼働確認用(認証不要・秘密情報は含めない)
+app.get("/healthz", (_req, res) => {
+  res.json({
+    ok: true,
+    app: "mt-schedule-secretary",
+    ai: config.aiProvider === "openai" && config.openaiApiKey ? "openai" : "rule-based",
+    calendar: config.calendarMode,
+    time: new Date().toISOString(),
+  });
+});
+
 app.use(authRouter);
 app.use(dashboardRouter);
 app.use(messagesRouter);
