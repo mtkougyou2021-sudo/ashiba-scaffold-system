@@ -6,6 +6,7 @@ import {
   ExtractorInput,
   ExtractionResult,
   extractionResultSchema,
+  emptyCandidate,
 } from "./types";
 
 const SYSTEM_PROMPT = `あなたは足場工事会社「株式会社MT興業」の予定管理秘書AIです。
@@ -67,7 +68,13 @@ const SYSTEM_PROMPT = `あなたは足場工事会社「株式会社MT興業」�
     }
   ]
 }
-予定でない場合も candidates に1件(out_of_scope)を入れて返してください。JSON以外の文章は一切出力しないでください。`;
+予定でない場合も candidates に1件(out_of_scope)を入れて返してください。JSON以外の文章は一切出力しないでください。
+
+【出力上の注意】
+- 配列の項目(date_candidates / notes / missing_fields)に該当が無い場合は、null ではなく空配列 [] を入れてください。
+- 時刻は "09:00" のように2桁で書いてください。
+- workers は数値で書いてください(例: 4)。単位は付けないでください。
+- candidates は必ず配列にしてください。`;
 
 export class OpenAIExtractor implements Extractor {
   private client: OpenAI;
@@ -102,10 +109,29 @@ export class OpenAIExtractor implements Extractor {
 
     const content = res.choices[0]?.message?.content;
     if (!content) throw new Error("AIから応答がありませんでした");
-    const parsed = extractionResultSchema.safeParse(JSON.parse(content));
+
+    let raw: unknown;
+    try {
+      raw = JSON.parse(content);
+    } catch {
+      throw new Error("AIの応答をJSONとして読み取れませんでした");
+    }
+
+    const parsed = extractionResultSchema.safeParse(raw);
     if (!parsed.success) {
       throw new Error(`AI出力がスキーマに適合しません: ${parsed.error.message.slice(0, 500)}`);
     }
+
+    // 候補が1件も返らなかった場合は、元データを失わないよう確認待ちの1件を作る
+    if (parsed.data.candidates.length === 0) {
+      const fallback = emptyCandidate(input.text);
+      fallback.classification = "insufficient";
+      fallback.missing_fields = ["日付", "内容"];
+      fallback.notes = ["AIが予定候補を抽出できませんでした。内容を確認して手入力してください。"];
+      fallback.confidence = 0;
+      return { candidates: [fallback] };
+    }
+
     // source_text が空なら元文章で補完
     for (const c of parsed.data.candidates) {
       if (!c.source_text) c.source_text = input.text;
