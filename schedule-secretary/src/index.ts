@@ -19,6 +19,10 @@ if (!config.sessionSecret) {
 
 const app = express();
 
+// Railway等ではTLSが手前のプロキシで終端されるため、これが無いと req.secure が false になり
+// secure Cookie が保存されずログインできない。
+app.set("trust proxy", 1);
+
 // 実行ディレクトリ(schedule-secretary/)基準。開発(tsx)・本番(Docker)共通
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "src", "views"));

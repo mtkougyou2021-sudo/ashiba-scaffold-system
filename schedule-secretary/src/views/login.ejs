@@ -7,9 +7,39 @@
       <input type="email" name="email" required autocomplete="username" inputmode="email">
     </label>
     <label>パスワード
-      <input type="password" name="password" required autocomplete="current-password">
+      <span class="pw-wrap">
+        <input type="password" name="password" id="password" required autocomplete="current-password">
+        <button type="button" class="pw-toggle" id="pw-toggle" aria-label="パスワードを表示" aria-pressed="false">
+          <svg class="pw-icon-show" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <svg class="pw-icon-hide" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" hidden>
+            <path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <line x1="4" y1="20" x2="20" y2="4" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+        </button>
+      </span>
     </label>
     <button type="submit" class="btn btn-primary btn-lg">ログイン</button>
   </form>
 </div>
+<script>
+  (function () {
+    var input = document.getElementById('password');
+    var btn = document.getElementById('pw-toggle');
+    var iconShow = btn.querySelector('.pw-icon-show');
+    var iconHide = btn.querySelector('.pw-icon-hide');
+    btn.addEventListener('click', function () {
+      var visible = input.type === 'text';
+      input.type = visible ? 'password' : 'text';
+      iconShow.hidden = !visible;
+      iconHide.hidden = visible;
+      btn.setAttribute('aria-pressed', String(!visible));
+      btn.setAttribute('aria-label', visible ? 'パスワードを表示' : 'パスワードを隠す');
+      input.focus();
+    });
+  })();
+</script>
 <%- include('partials/footer') %>

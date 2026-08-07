@@ -71,6 +71,28 @@ input, select, textarea {
   background: #fff;
 }
 textarea { resize: vertical; }
+/* パスワード表示切替 */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { padding-right: 52px; }
+.pw-toggle {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 0;
+  width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+.pw-toggle:hover { color: var(--primary); }
+.pw-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .checkbox-label input { width: 22px; height: 22px; margin: 0; }
 .grid-2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
