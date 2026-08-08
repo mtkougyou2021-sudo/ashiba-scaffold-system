@@ -132,7 +132,10 @@ async function handleEvent(event: LineEvent): Promise<void> {
     // 雑談・挨拶は通知も返信もしない(通知が埋もれるのを防ぐ)
     if (actionable.length === 0) return;
 
-    await notifyApprover([buildApprovalMessage(actionable, senderName)]);
+    await notifyApprover(
+      [buildApprovalMessage(actionable, senderName)],
+      buildFallbackText(actionable, senderName)
+    );
 
     // 1対1では受付を返信。グループでは発言の流れを乱さないため返信しない。
     if (!isGroup) {
@@ -277,22 +280,47 @@ function truncate(s: string, n: number): string {
   return s.length > n ? `${s.slice(0, n)}…` : s;
 }
 
-async function notifyApprover(messages: Array<Record<string, unknown>>): Promise<void> {
+async function notifyApprover(
+  messages: Array<Record<string, unknown>>,
+  fallbackText?: string
+): Promise<void> {
   if (!config.lineApproverUserId) return;
   try {
     await pushMessages(config.lineApproverUserId, messages);
   } catch (err) {
     await recordError("line_push", err);
-    // Flexの送信に失敗した場合でも承認依頼が届くよう、文章で送り直す
+    // カードの送信に失敗しても内容が分かるよう、要点を文章で送り直す
     try {
       await pushText(
         config.lineApproverUserId,
-        `予定候補が届きました。管理画面で確認してください。\n${link("/candidates?status=pending")}`
+        fallbackText ?? `予定候補が届きました。管理画面で確認してください。\n${link("/candidates?status=pending")}`
       );
     } catch {
       /* 記録済みのため何もしない */
     }
   }
+}
+
+/** カード送信に失敗したときの文章版(内容が分かるようにする) */
+function buildFallbackText(candidates: ScheduleCandidate[], senderName: string): string {
+  const lines = [`📋 ${senderName} さんから予定候補が届きました(${candidates.length}件)`, ""];
+  for (const c of candidates.slice(0, 5)) {
+    const d = effectiveData(c);
+    const date = d.date
+      ? formatDateJa(d.date)
+      : d.date_candidates.length > 0
+        ? `候補 ${d.date_candidates.map(formatDateJa).join("/")}`
+        : "日付未確定";
+    lines.push("━━━━━━━━━━");
+    lines.push(`${d.event_type ? `【${d.event_type}】` : ""}${d.title ?? d.address ?? "現場未定"}`);
+    lines.push(`${date}${d.start_time ? ` ${d.start_time}` : ""}`);
+    if (d.missing_fields.length > 0) lines.push(`不足: ${d.missing_fields.join("、")}`);
+    const url = link(`/candidates/${c.id}`);
+    if (url) lines.push(url);
+  }
+  lines.push("");
+  lines.push("※承認するまでカレンダーには登録されません。");
+  return lines.join("\n");
 }
 
 async function safeReply(replyToken: string | undefined, text: string): Promise<void> {

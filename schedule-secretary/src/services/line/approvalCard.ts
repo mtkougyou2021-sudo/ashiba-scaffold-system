@@ -9,20 +9,30 @@ const ORANGE = "#B7791F";
 const RED = "#C0392B";
 const GRAY = "#6B7A74";
 
+/**
+ * 項目行。
+ * baselineレイアウトは文字の折り返し(wrap)を受け付けずLINE側で拒否されるため、
+ * horizontalを使う。現場名や住所は長くなるので折り返しは必須。
+ */
 function row(label: string, value: string, color = "#1F2A26"): LineMessage {
   return {
     type: "box",
-    layout: "baseline",
+    layout: "horizontal",
     spacing: "sm",
     contents: [
-      { type: "text", text: label, color: GRAY, size: "sm", flex: 2 },
+      { type: "text", text: label, color: GRAY, size: "sm", flex: 2, wrap: false },
       { type: "text", text: value, wrap: true, color, size: "sm", flex: 5 },
     ],
   };
 }
 
+/**
+ * LINEはhttps以外のURLを含むカードを丸ごと拒否する。
+ * リンクが使えない場合はボタン自体を出さず、カードは表示できるようにする。
+ */
 function candidateLink(id: number): string {
-  return config.appBaseUrl ? `${config.appBaseUrl}/candidates/${id}` : "";
+  if (!config.appBaseUrl.startsWith("https://")) return "";
+  return `${config.appBaseUrl}/candidates/${id}`;
 }
 
 /**

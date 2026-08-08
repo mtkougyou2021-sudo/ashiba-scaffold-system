@@ -9,6 +9,7 @@
     "start": "node dist/src/index.js",
     "seed": "tsx scripts/seed.ts",
     "test:ai": "tsx scripts/test-ai.ts",
+    "test:line": "APP_BASE_URL=https://example.up.railway.app tsx scripts/test-line-card.ts",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push"
   },
