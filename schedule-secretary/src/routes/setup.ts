@@ -3,6 +3,7 @@ import { ah } from "../utils/asyncHandler";
 import { config } from "../config";
 import { requireLogin } from "../middleware/auth";
 import { getSettings } from "../services/settingsService";
+import { prisma } from "../db";
 
 export const setupRouter = Router();
 
@@ -89,10 +90,22 @@ function buildChecks(): SetupCheck[] {
 setupRouter.get("/setup", requireLogin, ah(async (_req, res) => {
   const checks = buildChecks();
   const settings = await getSettings();
+
+  // LINE_APPROVER_USER_ID を調べる手間を省くため、実際に届いた送信者を表示する
+  const lineSenders = await prisma.message.findMany({
+    where: { source: "line", senderId: { not: null } },
+    distinct: ["senderId"],
+    orderBy: { receivedAt: "desc" },
+    take: 10,
+    select: { senderId: true, senderName: true, receivedAt: true },
+  });
+
   res.render("setup", {
     checks,
     readyCount: checks.filter((c) => c.ok).length,
     calendarId: settings.calendarId,
     webhookUrl: config.appBaseUrl ? `${config.appBaseUrl}/line/webhook` : "",
+    lineSenders,
+    approverUserId: config.lineApproverUserId,
   });
 }));

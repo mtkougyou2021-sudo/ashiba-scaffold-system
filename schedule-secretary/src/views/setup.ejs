@@ -45,6 +45,33 @@
 </div>
 
 <div class="card">
+  <h2>LINEユーザーIDの確認</h2>
+  <p class="muted">承認通知の宛先(<code>LINE_APPROVER_USER_ID</code>)に使うIDです。<strong>公式アカウントを友だち追加して何かメッセージを送る</strong>と、ここに表示されます。</p>
+
+  <% if (approverUserId) { %>
+    <p class="alert alert-ok">設定済みの宛先: <%= approverUserId %></p>
+  <% } %>
+
+  <% if (lineSenders.length === 0) { %>
+    <p class="muted">まだLINEからの受信がありません。公式アカウントにメッセージを送ってから、この画面を再読み込みしてください。</p>
+  <% } else { %>
+    <ul class="event-list">
+      <% lineSenders.forEach(s => { %>
+        <li>
+          <strong><%= s.senderName || '(名前不明)' %></strong>
+          <% if (approverUserId && approverUserId === s.senderId) { %>
+            <span class="badge badge-approved">承認者に設定済み</span>
+          <% } %>
+          <div class="source-text"><%= s.senderId %></div>
+          <div class="muted">最終受信: <%= fmtDateTime(s.receivedAt) %></div>
+        </li>
+      <% }) %>
+    </ul>
+    <p class="muted">代表者ご自身のIDをコピーし、Railwayの <code>LINE_APPROVER_USER_ID</code> に設定してください。</p>
+  <% } %>
+</div>
+
+<div class="card">
   <h2>つまずいたときは</h2>
   <p><strong>カレンダー登録が「登録エラー」になる</strong><br>
   <span class="muted">Googleの値のどれかが違っています。承認済みにはならず再登録ボタンが出るので、値を直して押し直せば登録されます。予定が消えることはありません。</span></p>

@@ -60,7 +60,7 @@ async function handleEvent(event: LineEvent): Promise<void> {
 
     // 文章以外(画像・PDF等)は第2段階で解析する。取りこぼさないよう記録と通知だけ行う。
     if (event.message.type !== "text") {
-      await handleNonText(event, senderName);
+      await handleNonText(event, senderName, userId);
       return;
     }
 
@@ -68,7 +68,7 @@ async function handleEvent(event: LineEvent): Promise<void> {
     if (!text) return;
 
     const message = await prisma.message.create({
-      data: { source: "line", senderName, rawText: text, receivedAt: new Date() },
+      data: { source: "line", senderName, senderId: userId ?? null, rawText: text, receivedAt: new Date() },
     });
 
     const result = await analyzeMessage(message.id);
@@ -103,7 +103,7 @@ async function handleEvent(event: LineEvent): Promise<void> {
   }
 }
 
-async function handleNonText(event: LineEvent, senderName: string): Promise<void> {
+async function handleNonText(event: LineEvent, senderName: string, userId?: string): Promise<void> {
   const kind =
     event.message?.type === "image" ? "画像" : event.message?.type === "file" ? "ファイル" : "添付";
   const name = event.message?.fileName ? `(${event.message.fileName})` : "";
@@ -112,6 +112,7 @@ async function handleNonText(event: LineEvent, senderName: string): Promise<void
     data: {
       source: "line",
       senderName,
+      senderId: userId ?? null,
       rawText: `【${kind}${name}を受信】LINEメッセージID: ${event.message?.id ?? "-"}`,
       receivedAt: new Date(),
       status: "received",

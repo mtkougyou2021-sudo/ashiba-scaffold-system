@@ -27,6 +27,7 @@ model Message {
   id         Int      @id @default(autoincrement())
   source     String // admin_text / admin_upload / line / gmail
   senderName String?  @map("sender_name")
+  senderId   String?  @map("sender_id") // LINEユーザーID等。承認者IDの設定に使う
   rawText    String?  @map("raw_text")
   receivedAt DateTime @default(now()) @map("received_at")
   status     String   @default("received") // received / analyzed / analyze_error
