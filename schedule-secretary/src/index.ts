@@ -1,7 +1,7 @@
 import express from "express";
 import cookieSession from "cookie-session";
 import path from "path";
-import { config } from "./config";
+import { config, maskSecrets } from "./config";
 import { authRouter } from "./routes/auth";
 import { dashboardRouter } from "./routes/dashboard";
 import { messagesRouter } from "./routes/messages";
@@ -17,6 +17,15 @@ if (!config.sessionSecret) {
   console.error("環境変数 SESSION_SECRET が設定されていません");
   process.exit(1);
 }
+
+// LINE Webhookの解析などは応答を返した後に非同期で走るため、そこで例外が出ても
+// サーバー全体を止めない。落ちると他の予定の受信まで止まってしまうため。
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection]", maskSecrets(reason instanceof Error ? reason.stack ?? reason.message : String(reason)));
+});
+process.on("uncaughtException", (err) => {
+  console.error("[uncaughtException]", maskSecrets(err.stack ?? err.message));
+});
 
 const app = express();
 

@@ -36,9 +36,16 @@ async function callLine(path: string, body: unknown): Promise<void> {
   }
 }
 
+/** LINEのメッセージオブジェクト(テキスト/Flex等) */
+export type LineMessage = Record<string, unknown>;
+
 /** 送信者への返信(replyTokenは1回のみ・約1分で失効) */
 export async function replyText(replyToken: string, text: string): Promise<void> {
   await callLine("/message/reply", { replyToken, messages: [{ type: "text", text }] });
+}
+
+export async function replyMessages(replyToken: string, messages: LineMessage[]): Promise<void> {
+  await callLine("/message/reply", { replyToken, messages: messages.slice(0, 5) });
 }
 
 /** 承認者へのプッシュ通知 */
@@ -46,11 +53,14 @@ export async function pushText(to: string, text: string): Promise<void> {
   await callLine("/message/push", { to, messages: [{ type: "text", text }] });
 }
 
-/** 送信者の表示名を取得(取得できなくても処理は続行する) */
-export async function getDisplayName(userId: string): Promise<string | null> {
+export async function pushMessages(to: string, messages: LineMessage[]): Promise<void> {
+  await callLine("/message/push", { to, messages: messages.slice(0, 5) });
+}
+
+async function fetchProfile(path: string): Promise<string | null> {
   if (!config.lineChannelAccessToken) return null;
   try {
-    const res = await fetch(`${API}/profile/${userId}`, {
+    const res = await fetch(`${API}${path}`, {
       headers: { Authorization: `Bearer ${config.lineChannelAccessToken}` },
     });
     if (!res.ok) return null;
@@ -59,6 +69,24 @@ export async function getDisplayName(userId: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/** 1対1トークの送信者名 */
+export async function getDisplayName(userId: string): Promise<string | null> {
+  return fetchProfile(`/profile/${userId}`);
+}
+
+/** グループ・複数人トークの発言者名(1対1とは別のAPIが必要) */
+export async function getGroupMemberName(
+  sourceType: "group" | "room",
+  sourceId: string,
+  userId: string
+): Promise<string | null> {
+  const path =
+    sourceType === "group"
+      ? `/group/${sourceId}/member/${userId}`
+      : `/room/${sourceId}/member/${userId}`;
+  return fetchProfile(path);
 }
 
 export function isLineConfigured(): boolean {
