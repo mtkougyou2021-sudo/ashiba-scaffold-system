@@ -36,9 +36,12 @@
   <h3>04. Railway(動かす場所)</h3>
   <a class="btn btn-primary btn-block" href="https://railway.app/dashboard" target="_blank" rel="noopener">Railway を開く →</a>
 
-  <h3 class="mt-8">05. LINE(第3段階・今は不要)</h3>
-  <a class="btn btn-ghost btn-block" href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers →</a>
+  <h3 class="mt-8">05. LINE連携(第3段階)</h3>
+  <a class="btn btn-primary btn-block" href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers →</a>
   <a class="btn btn-ghost btn-block mt-8" href="https://manager.line.biz/" target="_blank" rel="noopener">LINE公式アカウントマネージャー →</a>
+  <p class="muted mt-8">Messaging APIの「Webhook URL」に次を設定し、「Webhookの利用」をオンにしてください。</p>
+  <pre class="source-text"><%= (typeof webhookUrl !== 'undefined' && webhookUrl) ? webhookUrl : '(APP_BASE_URL を設定すると表示されます)' %></pre>
+  <p class="muted">あわせて、同じ画面の「応答メッセージ」はオフ、「あいさつメッセージ」は任意で設定してください。</p>
 </div>
 
 <div class="card">

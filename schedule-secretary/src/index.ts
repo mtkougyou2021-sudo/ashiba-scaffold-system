@@ -8,6 +8,7 @@ import { messagesRouter } from "./routes/messages";
 import { candidatesRouter } from "./routes/candidates";
 import { settingsRouter } from "./routes/settings";
 import { setupRouter } from "./routes/setup";
+import { lineWebhookRouter } from "./routes/lineWebhook";
 import { STATUS_LABELS } from "./services/candidateService";
 import { CLASSIFICATION_LABELS, EVENT_TYPES } from "./services/ai";
 import { formatDateJa } from "./utils/dates";
@@ -26,6 +27,10 @@ app.set("trust proxy", 1);
 // 実行ディレクトリ(schedule-secretary/)基準。開発(tsx)・本番(Docker)共通
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "src", "views"));
+
+// LINE Webhookは署名検証に生の本文が必要なため、他のパーサより先に登録する
+app.use(lineWebhookRouter);
+
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(process.cwd(), "public")));
 app.use(

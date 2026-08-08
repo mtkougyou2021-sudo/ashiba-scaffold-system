@@ -55,6 +55,34 @@ function buildChecks(): SetupCheck[] {
         ? "実際のGoogleカレンダーへ登録します"
         : "動作確認モードです。実際には登録されません(real に変更すると本番登録)",
     },
+    {
+      key: "LINE_CHANNEL_SECRET",
+      label: "LINE署名検証",
+      ok: !!config.lineChannelSecret,
+      hint: config.lineChannelSecret ? "設定済み" : "第3段階で使用します(未設定でも他の機能は動きます)",
+    },
+    {
+      key: "LINE_CHANNEL_ACCESS_TOKEN",
+      label: "LINE送信",
+      ok: !!config.lineChannelAccessToken,
+      hint: config.lineChannelAccessToken ? "設定済み" : "第3段階で使用します",
+    },
+    {
+      key: "LINE_APPROVER_USER_ID",
+      label: "LINE承認通知の宛先",
+      ok: !!config.lineApproverUserId,
+      hint: config.lineApproverUserId
+        ? "設定済み。予定候補が届くとLINEに通知します"
+        : "未設定のため、LINEへの承認通知は送られません",
+    },
+    {
+      key: "APP_BASE_URL",
+      label: "通知内のリンク",
+      ok: !!config.appBaseUrl,
+      hint: config.appBaseUrl
+        ? config.appBaseUrl
+        : "未設定のためLINE通知に承認画面のリンクが入りません",
+    },
   ];
 }
 
@@ -65,5 +93,6 @@ setupRouter.get("/setup", requireLogin, ah(async (_req, res) => {
     checks,
     readyCount: checks.filter((c) => c.ok).length,
     calendarId: settings.calendarId,
+    webhookUrl: config.appBaseUrl ? `${config.appBaseUrl}/line/webhook` : "",
   });
 }));
