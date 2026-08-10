@@ -21,12 +21,22 @@ function line(text: string, color?: string, bold = false): LineMessage {
 }
 
 /**
- * LINEはhttps以外のURLを含むカードを丸ごと拒否する。
- * リンクが使えない場合はボタンを出さず、カード自体は表示できるようにする。
+ * LINEは不正なURLを含むカードを丸ごと拒否し、承認ボタンごと表示できなくなる。
+ * 環境変数に改行や空白が混入していた場合でも巻き添えにならないよう、
+ * URLとして成立することを確認し、駄目ならボタンを出さない。
  */
 function candidateLink(id: number): string {
-  if (!config.appBaseUrl.startsWith("https://")) return "";
-  return `${config.appBaseUrl}/candidates/${id}`;
+  const base = config.appBaseUrl;
+  if (!base.startsWith("https://")) return "";
+  const url = `${base}/candidates/${id}`;
+  // 空白・改行・制御文字が含まれるURLはLINEが受け付けない
+  if (/[\s\u0000-\u001F\u007F]/.test(url)) return "";
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" ? url : "";
+  } catch {
+    return "";
+  }
 }
 
 /** ボタンのラベルは20文字までのため、超えないことを保証する */

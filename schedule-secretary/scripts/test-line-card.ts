@@ -40,6 +40,11 @@ function walk(node: Json, path: string, parentLayout?: string): void {
           typeof a.uri === "string" && /^https:\/\/.+/.test(a.uri),
           `${path}: uriアクションはhttpsのURLが必要です(現在: "${a.uri}")`
         );
+        // 環境変数に改行が混入するとURLが壊れ、LINEがカードごと拒否する
+        check(
+          typeof a.uri === "string" && !/[\s\u0000-\u001F\u007F]/.test(a.uri),
+          `${path}: uriに空白・改行が含まれています(現在: ${JSON.stringify(a.uri)})`
+        );
       }
       if (a.type === "postback") {
         check(
