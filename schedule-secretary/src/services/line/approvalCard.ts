@@ -6,75 +6,68 @@ import { LineMessage } from "./lineClient";
 
 const GREEN = "#1A6B54";
 const ORANGE = "#B7791F";
-const RED = "#C0392B";
 const GRAY = "#6B7A74";
 
 /**
- * 項目行。
- * baselineレイアウトは文字の折り返し(wrap)を受け付けずLINE側で拒否されるため、
- * horizontalを使う。現場名や住所は長くなるので折り返しは必須。
+ * LINEはFlexの指定が1つでも不正だとカード全体を拒否し、承認ボタンが表示できなくなる。
+ * 装飾よりも「確実に表示されること」を優先し、縦並びのboxとtext・buttonだけで組む。
  */
-function row(label: string, value: string, color = "#1F2A26"): LineMessage {
-  return {
-    type: "box",
-    layout: "horizontal",
-    spacing: "sm",
-    contents: [
-      { type: "text", text: label, color: GRAY, size: "sm", flex: 2, wrap: false },
-      { type: "text", text: value, wrap: true, color, size: "sm", flex: 5 },
-    ],
-  };
+
+function line(text: string, color?: string, bold = false): LineMessage {
+  const node: LineMessage = { type: "text", text, size: "sm", wrap: true };
+  if (color) node.color = color;
+  if (bold) node.weight = "bold";
+  return node;
 }
 
 /**
  * LINEはhttps以外のURLを含むカードを丸ごと拒否する。
- * リンクが使えない場合はボタン自体を出さず、カードは表示できるようにする。
+ * リンクが使えない場合はボタンを出さず、カード自体は表示できるようにする。
  */
 function candidateLink(id: number): string {
   if (!config.appBaseUrl.startsWith("https://")) return "";
   return `${config.appBaseUrl}/candidates/${id}`;
 }
 
-/**
- * 承認カード(1件)。
- * LINEのトーク画面だけで承認・却下できるようにする。
- * 日付が未確定の候補は誤登録を防ぐため、承認ボタンを出さず管理画面へ誘導する。
- */
+/** ボタンのラベルは20文字までのため、超えないことを保証する */
+function label(text: string): string {
+  return text.length <= 20 ? text : `${text.slice(0, 19)}…`;
+}
+
 export function buildApprovalBubble(candidate: ScheduleCandidate, senderName: string): LineMessage {
   const d = effectiveData(candidate);
   const canApproveHere = !!d.date;
 
-  const dateLabel = d.date
+  const dateText = d.date
     ? formatDateJa(d.date)
     : d.date_candidates.length > 0
       ? `候補 ${d.date_candidates.map(formatDateJa).join(" / ")}`
       : "未確定";
-  const timeLabel = d.start_time ? `${d.start_time}${d.end_time ? `〜${d.end_time}` : ""}` : "未確定";
-
-  const statusColor =
-    candidate.status === "pending" ? ORANGE : candidate.status === "insufficient" ? RED : GRAY;
+  const timeText = d.start_time ? `${d.start_time}${d.end_time ? `〜${d.end_time}` : ""}` : "未確定";
 
   const body: LineMessage[] = [
-    row("状態", STATUS_LABELS[candidate.status] ?? candidate.status, statusColor),
-    row("日付", dateLabel, d.date ? "#1F2A26" : ORANGE),
-    row("時刻", timeLabel, d.start_time ? "#1F2A26" : ORANGE),
+    line(buildEventTitle(d), undefined, true),
+    line(`状態: ${STATUS_LABELS[candidate.status] ?? candidate.status}`, ORANGE),
+    line(`日付: ${dateText}`, d.date ? undefined : ORANGE),
+    line(`時刻: ${timeText}`, d.start_time ? undefined : ORANGE),
   ];
-  if (d.address) body.push(row("場所", d.address));
-  if (d.workers !== null) body.push(row("人数", `${d.workers}名`));
-  if (d.client_name) body.push(row("元請", d.client_name));
-  if (d.missing_fields.length > 0) body.push(row("不足", d.missing_fields.join("、"), ORANGE));
-  body.push(row("送信元", senderName));
+  if (d.address) body.push(line(`場所: ${d.address}`));
+  if (d.workers !== null && d.workers !== undefined) body.push(line(`人数: ${d.workers}名`));
+  if (d.client_name) body.push(line(`元請: ${d.client_name}`));
+  if (Array.isArray(d.missing_fields) && d.missing_fields.length > 0) {
+    body.push(line(`不足: ${d.missing_fields.join("、")}`, ORANGE));
+  }
+  body.push(line(`送信元: ${senderName}`, GRAY));
 
   const footer: LineMessage[] = [];
   if (canApproveHere) {
     footer.push({
       type: "button",
       style: "primary",
-      height: "sm",
       color: GREEN,
       action: {
         type: "postback",
-        label: "承認してカレンダー登録",
+        label: label("承認してカレンダー登録"),
         data: `action=approve&id=${candidate.id}`,
         displayText: "承認します",
       },
@@ -82,55 +75,30 @@ export function buildApprovalBubble(candidate: ScheduleCandidate, senderName: st
     footer.push({
       type: "button",
       style: "secondary",
-      height: "sm",
       action: {
         type: "postback",
-        label: "却下",
+        label: label("却下"),
         data: `action=reject&id=${candidate.id}`,
         displayText: "却下します",
       },
     });
   } else {
-    footer.push({
-      type: "text",
-      text: "日付が未確定のため、この画面からは登録できません。詳細画面で補完してください。",
-      size: "xs",
-      color: ORANGE,
-      wrap: true,
-    });
+    footer.push(line("日付が未確定のため、詳細画面で補完してから承認してください。", ORANGE));
   }
 
-  const link = candidateLink(candidate.id);
-  if (link) {
+  const url = candidateLink(candidate.id);
+  if (url) {
     footer.push({
       type: "button",
       style: "link",
-      height: "sm",
-      action: { type: "uri", label: canApproveHere ? "詳細・修正" : "詳細画面を開く", uri: link },
+      action: { type: "uri", label: label(canApproveHere ? "詳細・修正" : "詳細画面を開く"), uri: url },
     });
   }
 
   return {
     type: "bubble",
-    size: "mega",
-    header: {
-      type: "box",
-      layout: "vertical",
-      backgroundColor: GREEN,
-      paddingAll: "12px",
-      contents: [
-        {
-          type: "text",
-          text: buildEventTitle(d),
-          color: "#FFFFFF",
-          weight: "bold",
-          size: "md",
-          wrap: true,
-        },
-      ],
-    },
-    body: { type: "box", layout: "vertical", spacing: "sm", paddingAll: "12px", contents: body },
-    footer: { type: "box", layout: "vertical", spacing: "sm", paddingAll: "12px", contents: footer },
+    body: { type: "box", layout: "vertical", spacing: "sm", contents: body },
+    footer: { type: "box", layout: "vertical", spacing: "sm", contents: footer },
   };
 }
 
@@ -159,7 +127,7 @@ export function buildRejectReasonMessage(candidateId: number): LineMessage {
         type: "action",
         action: {
           type: "postback",
-          label: reason,
+          label: label(reason),
           data: `action=reject_reason&id=${candidateId}&reason=${encodeURIComponent(reason)}`,
           displayText: reason,
         },

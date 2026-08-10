@@ -31,8 +31,29 @@ async function callLine(path: string, body: unknown): Promise<void> {
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`LINE API エラー (${res.status}): ${detail.slice(0, 200)}`);
+    const raw = await res.text().catch(() => "");
+    throw new Error(`LINE API エラー (${res.status}): ${describeLineError(raw)}`);
+  }
+}
+
+/**
+ * LINEのエラー応答から原因を読み取れる形にする。
+ * detailsに不備のあるプロパティの場所が入るため、それを必ず残す。
+ */
+function describeLineError(raw: string): string {
+  try {
+    const body = JSON.parse(raw) as {
+      message?: string;
+      details?: Array<{ message?: string; property?: string }>;
+    };
+    const parts: string[] = [];
+    if (body.message) parts.push(body.message);
+    for (const d of body.details ?? []) {
+      parts.push(`${d.property ?? "?"} → ${d.message ?? "?"}`);
+    }
+    return parts.length > 0 ? parts.join(" / ").slice(0, 600) : raw.slice(0, 300);
+  } catch {
+    return raw.slice(0, 300);
   }
 }
 

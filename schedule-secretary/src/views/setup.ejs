@@ -1,5 +1,8 @@
 <%- include('partials/header', { pageTitle: '準備' }) %>
 <h1>準備状況</h1>
+
+<% if (flash) { %><p class="alert alert-ok"><%= flash %></p><% } %>
+<% if (error) { %><p class="alert alert-error"><%= error %></p><% } %>
 <p class="muted">外部サービスの設定が済んでいるかを確認できます。<strong>入力した値そのものはここには表示されません。</strong></p>
 
 <div class="card">
@@ -42,6 +45,15 @@
   <p class="muted mt-8">Messaging APIの「Webhook URL」に次を設定し、「Webhookの利用」をオンにしてください。</p>
   <pre class="source-text"><%= (typeof webhookUrl !== 'undefined' && webhookUrl) ? webhookUrl : '(APP_BASE_URL を設定すると表示されます)' %></pre>
   <p class="muted">あわせて、同じ画面の「応答メッセージ」はオフ、「あいさつメッセージ」は任意で設定してください。</p>
+</div>
+
+<div class="card">
+  <h2>LINEへのテスト送信</h2>
+  <p class="muted">承認ボタン付きのカードが正しく表示されるか確認できます。失敗した場合は理由がこの画面に表示されます。</p>
+  <form method="post" action="/setup/line-test">
+    <button class="btn btn-primary btn-block">承認カードをテスト送信</button>
+  </form>
+  <p class="muted mt-8">承認待ちの予定があればそれを、無ければ確認用の仮データを送ります。仮データを承認してもカレンダーには登録されません。</p>
 </div>
 
 <div class="card">

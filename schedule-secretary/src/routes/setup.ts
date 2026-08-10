@@ -2,8 +2,15 @@ import { Router } from "express";
 import { ah } from "../utils/asyncHandler";
 import { config } from "../config";
 import { requireLogin } from "../middleware/auth";
+import { ScheduleCandidate } from "@prisma/client";
 import { getSettings } from "../services/settingsService";
 import { prisma } from "../db";
+import { maskSecrets } from "../config";
+import { requireApprover } from "../middleware/auth";
+import { pushMessages } from "../services/line/lineClient";
+import { buildApprovalMessage } from "../services/line/approvalCard";
+import { recordError } from "../services/candidateService";
+import { emptyCandidate } from "../services/ai";
 
 export const setupRouter = Router();
 
@@ -87,7 +94,79 @@ function buildChecks(): SetupCheck[] {
   ];
 }
 
-setupRouter.get("/setup", requireLogin, ah(async (_req, res) => {
+/**
+ * LINEへのテスト送信。
+ * カードが表示されない原因(LINE側が指定を拒否している等)を、
+ * 実際にLINEへ送らずとも画面で確認できるようにする。
+ */
+setupRouter.post("/setup/line-test", requireLogin, requireApprover, ah(async (req, res) => {
+  const result = await sendLineTestCard();
+  const msg = result.ok
+    ? "テスト送信に成功しました。LINEをご確認ください。"
+    : `テスト送信に失敗しました: ${result.error}`;
+  res.redirect(`/setup?${result.ok ? "msg" : "error"}=${encodeURIComponent(msg)}`);
+}));
+
+async function sendLineTestCard(): Promise<{ ok: boolean; error?: string }> {
+  if (!config.lineChannelAccessToken) return { ok: false, error: "LINE_CHANNEL_ACCESS_TOKEN が未設定です" };
+  if (!config.lineApproverUserId) return { ok: false, error: "LINE_APPROVER_USER_ID が未設定です" };
+
+  // 実在の候補があればそれで、無ければ表示確認用の仮データで送る
+  const candidate =
+    (await prisma.scheduleCandidate.findFirst({
+      where: { status: "pending" },
+      orderBy: { id: "desc" },
+    })) ?? sampleCandidate();
+
+  try {
+    await pushMessages(config.lineApproverUserId, [
+      buildApprovalMessage([candidate], "テスト送信"),
+    ]);
+    return { ok: true };
+  } catch (err) {
+    const message = maskSecrets(err instanceof Error ? err.message : String(err));
+    await recordError("line_test", err);
+    return { ok: false, error: message };
+  }
+}
+
+function sampleCandidate(): ScheduleCandidate {
+  const data = {
+    ...emptyCandidate("(テスト送信)8月10日9時に港区〇〇工場で現調お願いします"),
+    classification: "approval_pending" as const,
+    event_type: "現調",
+    title: "港区〇〇工場",
+    work_description: "現場確認",
+    date: "2026-08-10",
+    start_time: "09:00",
+    address: "名古屋市港区",
+    workers: 4,
+    confidence: 0.9,
+  };
+  return {
+    id: 0,
+    messageId: null,
+    attachmentId: null,
+    sourceText: data.source_text,
+    extractedData: data as never,
+    modifiedData: null,
+    aiClassification: data.classification,
+    confidence: data.confidence,
+    missingFields: [] as never,
+    isTentative: false,
+    changeType: "new",
+    status: "pending",
+    approvedById: null,
+    approvedAt: null,
+    rejectReason: null,
+    googleEventId: null,
+    relatedEventId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+setupRouter.get("/setup", requireLogin, ah(async (req, res) => {
   const checks = buildChecks();
   const settings = await getSettings();
 
@@ -107,5 +186,7 @@ setupRouter.get("/setup", requireLogin, ah(async (_req, res) => {
     webhookUrl: config.appBaseUrl ? `${config.appBaseUrl}/line/webhook` : "",
     lineSenders,
     approverUserId: config.lineApproverUserId,
+    flash: req.query.msg ?? null,
+    error: req.query.error ?? null,
   });
 }));
