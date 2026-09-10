@@ -5,7 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>足場図面自動生成システム｜MT興業</title>
+<title>足場図面自動生成システム｜株式会社MT興業</title>
+<meta name="description" content="足場の割付図・平面図・立面図を自動生成する無料ツールです。建物寸法と壁からの離れを入力するだけで、くさび式足場の支柱割付を自動計算します。株式会社MT興業が開発・公開しています。">
+<meta name="author" content="株式会社MT興業">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://mtkougyou2021-sudo.github.io/ashiba-scaffold-system/">
+
+<!-- OGP / SNSでシェアされたときの表示 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="株式会社MT興業">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="足場図面自動生成システム｜株式会社MT興業">
+<meta property="og:description" content="建物寸法を入力するだけで、くさび式足場の割付図・平面図・立面図を自動生成する無料ツールです。">
+<meta property="og:url" content="https://mtkougyou2021-sudo.github.io/ashiba-scaffold-system/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@mtkougyou1018">
+
+<!-- 構造化データ：本サイトから mtkougyou.com への被リンクを兼ねる -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "足場図面自動生成システム",
+  "url": "https://mtkougyou2021-sudo.github.io/ashiba-scaffold-system/",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Web browser",
+  "inLanguage": "ja",
+  "description": "建物寸法と壁からの離れを入力するだけで、くさび式足場の支柱割付・平面図・立面図を自動生成する無料ツール。",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+  "author": {
+    "@type": "Organization",
+    "name": "株式会社MT興業",
+    "url": "https://mtkougyou.com/",
+    "sameAs": ["https://mtkougyou.com/", "https://x.com/mtkougyou1018"]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "株式会社MT興業",
+    "url": "https://mtkougyou.com/"
+  }
+}
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Share+Tech+Mono&display=swap');
@@ -39,6 +79,13 @@
     display: flex;
     align-items: center;
     gap: 16px;
+  }
+  header .logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+  header .logo a:hover {
+    text-decoration: underline;
   }
   header .logo {
     font-size: 11px;
@@ -636,7 +683,7 @@
 
 <header>
   <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
-  <div class="logo">MT興業</div>
+  <div class="logo"><a href="https://mtkougyou.com/" target="_blank" rel="noopener" title="株式会社MT興業 公式サイト">MT興業</a></div>
   <h1>足場図面自動生成システム</h1>
   <div class="badge">くさび緊結式</div>
 </header>

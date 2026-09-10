@@ -1,0 +1,156 @@
+<!--
+================================================================
+ ② 構造化データ（JSON-LD）コピペ用
+================================================================
+
+【これは何？】
+ Googleに「この会社は足場工事業で、住所はここで、電話はこれ」と
+ 機械が読める形で直接伝えるコードです。
+ 地図枠（ローカル検索）の順位に効きます。無料。
+
+【貼り付け方 / WordPress】
+  方法A（推奨・プラグイン不要）:
+    外観 → テーマファイルエディター → header.php を開き
+    </head> の直前にこのコードを貼り付けて「ファイルを更新」
+    ※テーマ更新で消えるので、子テーマ推奨
+
+  方法B（安全・おすすめ）:
+    プラグイン「WPCode」（無料）をインストール
+    → コードスニペット → 新規追加 → HTMLスニペット
+    → 挿入位置を「サイト全体のヘッダー」にして貼り付け
+
+【貼り付ける前に】
+  下の 【要記入：〜】 を全部実際の値に置き換えてください。
+  置き換え忘れがあるとGoogleがエラーを出します。
+
+【確認方法】
+  貼った後 https://search.google.com/test/rich-results で
+  https://mtkougyou.com/ を検査 → エラー0件になればOK
+================================================================
+-->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "GeneralContractor",
+  "@id": "https://mtkougyou.com/#organization",
+  "name": "株式会社MT興業",
+  "alternateName": "MT興業",
+  "description": "【要記入：市区町村】を拠点に愛知県全域で足場工事を行う会社です。くさび式足場・単管足場・解体足場・塗装用足場の設計から組立・解体まで一貫して対応します。",
+  "url": "https://mtkougyou.com/",
+  "telephone": "【要記入：電話番号（例）052-000-0000】",
+  "faxNumber": "【要記入：FAX番号】",
+  "email": "【要記入：メールアドレス】",
+  "image": "https://mtkougyou.com/【要記入：会社の看板やトラックの写真URL】",
+  "logo": "https://mtkougyou.com/【要記入：ロゴ画像URL】",
+  "priceRange": "見積無料",
+  "foundingDate": "【要記入：設立年（例）2021】",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "【要記入：番地まで（例）中川区〇〇1-2-3】",
+    "addressLocality": "【要記入：市区町村（例）名古屋市】",
+    "addressRegion": "愛知県",
+    "postalCode": "【要記入：郵便番号（例）454-0000】",
+    "addressCountry": "JP"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "【要記入：緯度】",
+    "longitude": "【要記入：経度】"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "08:00",
+      "closes": "17:00"
+    }
+  ],
+  "areaServed": [
+    { "@type": "AdministrativeArea", "name": "愛知県" },
+    { "@type": "City", "name": "名古屋市" },
+    { "@type": "City", "name": "【要記入：主要対応市町村】" }
+  ],
+  "knowsAbout": [
+    "足場工事",
+    "くさび式足場",
+    "単管足場",
+    "解体工事用足場",
+    "外壁塗装用足場",
+    "仮設工事",
+    "鳶工事"
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "足場工事メニュー",
+    "itemListElement": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "くさび式足場の組立・解体" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "単管足場の組立・解体" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "解体工事用足場・養生" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "外壁塗装用足場" } }
+    ]
+  },
+  "sameAs": [
+    "https://x.com/mtkougyou1018",
+    "【要記入：Googleビジネスプロフィールの共有URL】",
+    "【要記入：Instagram等があれば】"
+  ]
+}
+</script>
+
+
+<!--
+================================================================
+ 【追加】求人ページ専用の構造化データ
+ 求人ページ（/recruit/）にだけ、上のコードに加えて貼り付けてください。
+ Google しごと検索（Google for Jobs）に無料で掲載されます。
+ 「足場 求人 名古屋」の検索結果の最上部に出る枠です。効果大。
+================================================================
+-->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  "title": "足場職人（とび職）／未経験歓迎",
+  "description": "<p>くさび式足場を中心とした足場の組立・解体作業をお任せします。未経験の方は先輩職人がマンツーマンで指導します。資格取得費用は全額会社が負担します。</p><ul><li>仕事内容：住宅・店舗・工場等の足場組立および解体</li><li>勤務地：【要記入：市区町村】および愛知県内の各現場</li><li>雇用形態：正社員</li></ul>",
+  "identifier": {
+    "@type": "PropertyValue",
+    "name": "株式会社MT興業",
+    "value": "MT-ASHIBA-001"
+  },
+  "datePosted": "【要記入：掲載日（例）2026-09-10】",
+  "validThrough": "【要記入：掲載終了日（例）2027-03-31】",
+  "employmentType": "FULL_TIME",
+  "hiringOrganization": {
+    "@type": "Organization",
+    "name": "株式会社MT興業",
+    "sameAs": "https://mtkougyou.com/",
+    "logo": "https://mtkougyou.com/【要記入：ロゴ画像URL】"
+  },
+  "jobLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "【要記入：番地まで】",
+      "addressLocality": "【要記入：市区町村】",
+      "addressRegion": "愛知県",
+      "postalCode": "【要記入：郵便番号】",
+      "addressCountry": "JP"
+    }
+  },
+  "baseSalary": {
+    "@type": "MonetaryAmount",
+    "currency": "JPY",
+    "value": {
+      "@type": "QuantitativeValue",
+      "minValue": "【要記入：月給下限（例）250000】",
+      "maxValue": "【要記入：月給上限（例）450000】",
+      "unitText": "MONTH"
+    }
+  },
+  "workHours": "8:00〜17:00",
+  "qualifications": "未経験可／普通自動車免許（AT限定可）歓迎",
+  "incentiveCompensation": "資格取得支援制度あり（費用全額会社負担）"
+}
+</script>
